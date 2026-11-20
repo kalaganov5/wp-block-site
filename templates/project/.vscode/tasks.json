@@ -1,0 +1,100 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "acme: локальный сайт — запустить",
+      "type": "shell",
+      "command": "docker compose up -d --build && docker compose logs -f setup",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: локальный сайт — открыть для телефона (QR)",
+      "type": "shell",
+      "command": "docker compose up -d && node wordpress/local/phone.js",
+      "options": {
+        "env": {
+          "ACME_BIND": "0.0.0.0"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: локальный сайт — остановить",
+      "type": "shell",
+      "command": "docker compose --profile tools stop",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: phpMyAdmin (http://localhost:8081)",
+      "type": "shell",
+      "command": "docker compose --profile tools up -d phpmyadmin",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: локальный сайт — журнал ошибок PHP",
+      "type": "shell",
+      "command": "docker compose exec wordpress tail -f wp-content/debug.log",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: новый блок темы",
+      "type": "shell",
+      "command": "node wordpress/tools/new-block.js ${input:blockName} --title=\"${input:blockTitle}\" --attrs=${input:blockAttrs}",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: собрать контент",
+      "type": "shell",
+      "command": "node wordpress/tools/build-content.js",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: все проверки (npm run check)",
+      "type": "shell",
+      "command": "npm run check",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: локальный сайт — страницы открываются",
+      "type": "shell",
+      "command": "bash wordpress/deploy/smoke.sh http://localhost:8080",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: локальный сайт — защита (заголовки, закрытые файлы)",
+      "type": "shell",
+      "command": "bash wordpress/deploy/hardening-check.sh http://localhost:8080",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: ручной деплой на тестовый (без GitHub Actions)",
+      "type": "shell",
+      "command": "bash wordpress/deploy/manual.sh test",
+      "problemMatcher": []
+    },
+    {
+      "label": "acme: обход сайта 360 px",
+      "type": "shell",
+      "command": "node wordpress/tools/qa/crawl.js 360",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "blockName",
+      "type": "promptString",
+      "description": "Имя блока латиницей (price-table)"
+    },
+    {
+      "id": "blockTitle",
+      "type": "promptString",
+      "description": "Название в редакторе (Таблица цен)"
+    },
+    {
+      "id": "blockAttrs",
+      "type": "promptString",
+      "description": "Атрибуты через запятую (title,lead,items)",
+      "default": "title,lead,items"
+    }
+  ]
+}

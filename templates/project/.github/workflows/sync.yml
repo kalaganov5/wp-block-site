@@ -1,0 +1,81 @@
+# Копия боевого сайта на тестовый: база и загруженные файлы (боевой → тестовый, не наоборот).
+# Запуск: Actions → «Копия боевого на тестовый» → Run workflow.
+# Работает под SSH-доступом боевого окружения (production): ему должны быть видны обе папки сайта.
+# В окружении production нужны секреты SYNC_TEST_PATH и SYNC_TEST_URL — папка и адрес тестового сайта.
+name: Копия боевого на тестовый
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep_leads:
+        description: Оставить в копии заявки посетителей (по умолчанию удаляются)
+        type: boolean
+        default: false
+
+# Минимальные права: workflow только читает репозиторий.
+permissions:
+  contents: read
+
+# Та же группа, что у деплоя на тестовый: копирование и деплой не идут одновременно.
+concurrency:
+  group: deploy-test
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Боевой → тестовый
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Проверка ключей
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+          SYNC_TEST_PATH: ${{ secrets.SYNC_TEST_PATH }}
+          SYNC_TEST_URL: ${{ secrets.SYNC_TEST_URL }}
+        run: |
+          miss=""
+          for v in SSH_HOST SSH_USER DEPLOY_PATH SITE_URL SYNC_TEST_PATH SYNC_TEST_URL; do [ -n "${!v}" ] || miss="$miss $v"; done
+          if [ -n "$miss" ]; then
+            echo "::error::Не заданы секреты окружения production:$miss (Settings → Environments → production)."
+            exit 1
+          fi
+
+      - name: SSH
+        uses: ./.github/actions/ssh
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          key: ${{ secrets.SSH_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Копирование
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+          R: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          PROD_PATH: ${{ secrets.DEPLOY_PATH }}
+          PROD_URL: ${{ secrets.SITE_URL }}
+          TEST_PATH: ${{ secrets.SYNC_TEST_PATH }}
+          TEST_URL: ${{ secrets.SYNC_TEST_URL }}
+          PHP_BIN: ${{ secrets.PHP_BIN }}
+          KEEP_LEADS: ${{ inputs.keep_leads && '1' || '0' }}
+        run: |
+          set -euo pipefail
+          DIR=".acme-sync-$GITHUB_RUN_ID"
+          umask 077
+          : > sync.env
+          for v in PROD_PATH PROD_URL TEST_PATH TEST_URL PHP_BIN KEEP_LEADS; do printf 'export %s=%q\n' "$v" "${!v}" >> sync.env; done
+          $SSH_CMD "$R" "mkdir -p ~/$DIR && chmod 700 ~/$DIR"
+          cat wordpress/deploy/sync.sh | $SSH_CMD "$R" "cat > ~/$DIR/sync.sh"
+          cat wordpress/deploy/lib.sh | $SSH_CMD "$R" "cat > ~/$DIR/lib.sh"
+          cat sync.env | $SSH_CMD "$R" "cat > ~/$DIR/sync.env && chmod 600 ~/$DIR/sync.env"
+          rm -f sync.env
+          $SSH_CMD "$R" "bash -lc 'set -a; . ~/$DIR/sync.env; set +a; bash ~/$DIR/sync.sh; s=\$?; rm -rf ~/$DIR; exit \$s'"

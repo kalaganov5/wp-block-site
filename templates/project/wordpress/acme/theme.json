@@ -1,0 +1,271 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"settings": {
+		"appearanceTools": false,
+		"useRootPaddingAwareAlignments": false,
+		"layout": {
+			"contentSize": "680px",
+			"wideSize": "1160px",
+			"allowEditing": false,
+			"allowCustomContentAndWideSize": false
+		},
+		"color": {
+			"defaultPalette": false,
+			"defaultGradients": false,
+			"defaultDuotone": false,
+			"custom": false,
+			"customGradient": false,
+			"customDuotone": false,
+			"duotone": [],
+			"gradients": [],
+			"palette": [
+				{
+					"slug": "surface",
+					"name": "Фон страницы",
+					"color": "#f6f5f1"
+				},
+				{
+					"slug": "surface-raised",
+					"name": "Фон карточки",
+					"color": "#ffffff"
+				},
+				{
+					"slug": "surface-sunken",
+					"name": "Фон секции",
+					"color": "#ecebe4"
+				},
+				{
+					"slug": "line",
+					"name": "Линия",
+					"color": "#d9d7cd"
+				},
+				{
+					"slug": "ink",
+					"name": "Текст",
+					"color": "#1a1f1d"
+				},
+				{
+					"slug": "ink-muted",
+					"name": "Текст вторичный",
+					"color": "#545b57"
+				},
+				{
+					"slug": "accent",
+					"name": "Акцент · действие",
+					"color": "#334862"
+				},
+				{
+					"slug": "accent-soft",
+					"name": "Акцент · мягкий",
+					"color": "#e1e7ef"
+				},
+				{
+					"slug": "on-accent",
+					"name": "Текст на акценте",
+					"color": "#ffffff"
+				},
+				{
+					"slug": "success",
+					"name": "Зелёный · результат",
+					"color": "#97ca58"
+				},
+				{
+					"slug": "success-soft",
+					"name": "Зелёный · мягкий",
+					"color": "#eaf3dd"
+				},
+				{
+					"slug": "signal",
+					"name": "Янтарный · срочно",
+					"color": "#f2b233"
+				},
+				{
+					"slug": "signal-soft",
+					"name": "Янтарный · мягкий",
+					"color": "#fbefd2"
+				},
+				{
+					"slug": "danger",
+					"name": "Ошибка",
+					"color": "#b42318"
+				}
+			]
+		},
+		"typography": {
+			"defaultFontSizes": false,
+			"customFontSize": false,
+			"fluid": false,
+			"fontFamilies": [
+				{
+					"slug": "sans",
+					"name": "Основной",
+					"fontFamily": "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+				},
+				{
+					"slug": "mono",
+					"name": "Моноширинный",
+					"fontFamily": "ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+				}
+			],
+			"fontSizes": [
+				{
+					"slug": "xs",
+					"name": "13 · подписи",
+					"size": "13px"
+				},
+				{
+					"slug": "sm",
+					"name": "15 · вторичный",
+					"size": "15px"
+				},
+				{
+					"slug": "base",
+					"name": "16 · основной",
+					"size": "16px"
+				},
+				{
+					"slug": "md",
+					"name": "19 · лид, H3",
+					"size": "19px"
+				},
+				{
+					"slug": "lg",
+					"name": "24 · H2",
+					"size": "24px"
+				},
+				{
+					"slug": "xl",
+					"name": "32 · H1 страницы",
+					"size": "32px"
+				},
+				{
+					"slug": "xxl",
+					"name": "44 · H1 первого экрана",
+					"size": "44px"
+				}
+			],
+			"letterSpacing": false,
+			"textIndent": false,
+			"textColumns": false,
+			"textDecoration": false,
+			"textTransform": false,
+			"lineHeight": false,
+			"dropCap": false,
+			"writingMode": false,
+			"fontStyle": true,
+			"fontWeight": true
+		},
+		"spacing": {
+			"defaultSpacingSizes": false,
+			"customSpacingSize": false,
+			"margin": false,
+			"padding": true,
+			"blockGap": true,
+			"units": ["px", "%", "rem"],
+			"spacingSizes": [
+				{
+					"slug": "2",
+					"name": "8",
+					"size": "8px"
+				},
+				{
+					"slug": "3",
+					"name": "12",
+					"size": "12px"
+				},
+				{
+					"slug": "4",
+					"name": "16",
+					"size": "16px"
+				},
+				{
+					"slug": "5",
+					"name": "24",
+					"size": "24px"
+				},
+				{
+					"slug": "6",
+					"name": "32",
+					"size": "32px"
+				},
+				{
+					"slug": "7",
+					"name": "48",
+					"size": "48px"
+				},
+				{
+					"slug": "8",
+					"name": "64",
+					"size": "64px"
+				},
+				{
+					"slug": "9",
+					"name": "96",
+					"size": "96px"
+				}
+			]
+		},
+		"border": {
+			"color": false,
+			"style": false,
+			"width": false,
+			"radius": true,
+			"radiusSizes": [
+				{
+					"slug": "sm",
+					"name": "6 · поля, метки",
+					"size": "6px"
+				},
+				{
+					"slug": "md",
+					"name": "10 · кнопки",
+					"size": "10px"
+				},
+				{
+					"slug": "lg",
+					"name": "16 · карточки",
+					"size": "16px"
+				},
+				{
+					"slug": "pill",
+					"name": "Капсула",
+					"size": "999px"
+				}
+			]
+		},
+		"shadow": {
+			"defaultPresets": false,
+			"presets": []
+		},
+		"dimensions": {
+			"minHeight": false,
+			"aspectRatio": true
+		},
+		"position": {
+			"sticky": false,
+			"fixed": false
+		},
+		"lightbox": {
+			"enabled": false,
+			"allowEditing": false
+		},
+		"background": {
+			"backgroundImage": false,
+			"backgroundSize": false,
+			"gradient": false
+		}
+	},
+	"templateParts": [
+		{
+			"name": "header",
+			"title": "Шапка",
+			"area": "header"
+		},
+		{
+			"name": "footer",
+			"title": "Подвал",
+			"area": "footer"
+		}
+	]
+}

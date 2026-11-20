@@ -1,0 +1,66 @@
+# Проверка, что боевой сайт жив: каждые 6 часов открывает страницы из wordpress/deploy/pages.txt (тот же
+# smoke.sh, что после деплоя). Страница не открылась — запуск красный (GitHub пишет владельцу репозитория
+# на почту) и, если заданы ключи, сообщение уходит в Telegram.
+#
+# Настройка (Settings → Secrets and variables → Actions):
+#   Variables → SITE_URL — адрес боевого сайта, например https://acme.example. Пока переменной нет, проверка
+#     пропускается (каркас без сайта не должен слать ошибки).
+#   Secrets (необязательно) → TG_BOT_TOKEN и TG_CHAT_ID — бот и чат для сообщения о сбое. Это секреты
+#     репозитория, а не окружения: проверка идёт без окружения production, чтобы не ждать его подтверждений.
+#     Внимание: общий секрет GitHub подставляет и в окружение, где своего нет, — тогда в окружении test
+#     задайте свои TG_BOT_TOKEN и TG_CHAT_ID (или пустые), иначе тестовые заявки пойдут в боевой чат.
+#     Чтобы не пересекаться совсем, задайте ALERT_TG_BOT_TOKEN и ALERT_TG_CHAT_ID — они важнее.
+name: Сайт жив
+
+on:
+  schedule:
+    - cron: '17 */6 * * *' # не ровно в :00 — в начале часа очередь GitHub перегружена
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: health
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Страницы боевого сайта
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Страницы открываются
+        id: smoke
+        run: |
+          set -o pipefail # иначе код возврата smoke.sh потеряется за tee
+          if [ -z "$SITE_URL" ]; then
+            echo "::notice::Переменная репозитория SITE_URL не задана — проверка пропущена (Settings → Secrets and variables → Actions → Variables)."
+            exit 0
+          fi
+          # Одна повторная попытка через минуту: короткий сбой хостинга — не повод будить владельца.
+          if ! bash wordpress/deploy/smoke.sh "$SITE_URL" | tee smoke.log; then
+            sleep 60
+            bash wordpress/deploy/smoke.sh "$SITE_URL" | tee smoke.log
+          fi
+      - name: Сообщение в Telegram
+        if: ${{ failure() && steps.smoke.conclusion == 'failure' }}
+        env:
+          TG_BOT_TOKEN: ${{ secrets.ALERT_TG_BOT_TOKEN || secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.ALERT_TG_CHAT_ID || secrets.TG_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TG_BOT_TOKEN" ] || [ -z "$TG_CHAT_ID" ]; then
+            echo "::notice::TG_BOT_TOKEN и TG_CHAT_ID не заданы — сообщение в Telegram не отправлено."
+            exit 0
+          fi
+          text="Сайт $SITE_URL не открывается"$'\n'"$(grep -E '^(::error::|ОШИБКА|Не открываются)' smoke.log | sed 's/^::error:://' | head -n 8)"$'\n'"$RUN_URL"
+          # Токен — в адресе запроса: curl без -v его не печатает, а GitHub скрывает секреты в журнале.
+          curl -fsS -m 20 -o /dev/null "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TG_CHAT_ID}" --data-urlencode "text=${text}" \
+            || echo "::warning::не удалось отправить сообщение в Telegram"

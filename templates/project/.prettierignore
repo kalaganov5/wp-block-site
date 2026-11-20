@@ -1,0 +1,16 @@
+# Сгенерированное сборщиками — формат задаёт сборщик.
+wordpress/acme-core/content/
+# Разметка Gutenberg: пробелы и переносы — часть сохранённого блока, форматировать нельзя.
+wordpress/acme/templates/
+wordpress/acme/parts/
+wordpress/acme/patterns/
+# PHP форматирует phpcbf (npm run format), документы — человек.
+*.php
+*.md
+# Чужое и служебное.
+node_modules/
+vendor/
+package-lock.json
+composer.lock
+seo-report/
+local-data/

@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "acme/archive-head",
+	"title": "Заголовок списка",
+	"category": "acme",
+	"description": "Заголовок и описание страницы блога, рубрики или архива; режим 404 — страница «не найдено».",
+	"textdomain": "acme",
+	"attributes": {
+		"mode": { "type": "string", "default": "" }
+	},
+	"supports": {
+		"html": false,
+		"customClassName": false,
+		"reusable": false
+	},
+	"editorScript": "acme-editor",
+	"render": "file:./render.php"
+}

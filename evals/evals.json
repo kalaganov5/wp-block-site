@@ -1,0 +1,186 @@
+{
+  "skill_name": "wp-block-site",
+  "description": "Проверки, что ИИ-агент со скиллом следует правилам проекта. Каждая задача запускается в проекте, развёрнутом scripts/scaffold.js (slug acme), и оценивается по assertions. Прогон: skill-creator (режим eval) или вручную — задача → дифф → чек-лист.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "new-theme-block",
+      "prompt": "Добавь на сайт блок «Тарифы»: три карточки с названием, ценой и списком того, что входит, и кнопкой «Выбрать». Владелец должен менять всё в редакторе.",
+      "expected_output": "Динамический блок темы acme/tariffs (block.json + render.php), созданный генератором или по его образцу; атрибут-массив с default [] и формой элемента в itemShape; render.php с экранированием; подпись кнопки через строки; стили в style.css блока; никакой регистрации и JS для редактора.",
+      "files": [],
+      "assertions": [
+        "Создана папка wordpress/acme/blocks/<имя>/ с block.json и render.php (или запущен node wordpress/tools/new-block.js)",
+        "block.json: apiVersion 3, имя acme/<имя>, category acme, editorScript acme-editor, render file:./render.php, supports.html false",
+        "Атрибут с карточками — type array, default — пустой массив [], поля элемента (title, price, features…) — в itemShape; образцов текста в default нет",
+        "Не добавлены register_block_type, registerBlockType или отдельный JS редактора для этого блока",
+        "Весь вывод в render.php через esc_html / esc_attr / esc_url; переменные с префиксом $acme_",
+        "Текст кнопки «Выбрать» — через acme_t()/строки (ключ добавлен в project/content/strings.js на всех языках), а не зашит в разметку",
+        "Стили — wordpress/acme/blocks/<имя>/style.css, объявлен в block.json (\"style\": \"file:./style.css\"), на токенах (var(--…)), без новых цветов-констант",
+        "Подписи полей панели добавлены в LABELS editor.js или явно упомянуты как следующий шаг",
+        "Заголовки внутри блока начинаются с H2 (H1 выводит шаблон)",
+        "npm run check проходит (пределы размера, Stylelint, PHPCS)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "new-post-field",
+      "prompt": "У услуги нужно поле «Срок выполнения» (например, «1–2 дня»), чтобы показывать его в каталоге.",
+      "expected_output": "Одна строка в acme_meta_schema() для acme_service; вывод в блоке каталога или карточке с экранированием; никакого ACF и нового JS.",
+      "files": [],
+      "assertions": [
+        "Поле добавлено строкой в acme_meta_schema() (wordpress/acme-core/inc/post-types.php) с типом string и понятной подписью",
+        "Не установлен и не упомянут как нужный ACF или другой плагин полей",
+        "Не написан новый JS для панели (meta-panel.js строит поле сам)",
+        "Значение выводится через get_post_meta и esc_html в разметке темы",
+        "Тема не падает без плагина: вызов данных плагина защищён acme_has_core() / function_exists, или используется только get_post_meta"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "interface-string",
+      "prompt": "Поменяй текст кнопки в форме заявки с «Отправить» на «Получить консультацию» на всех языках.",
+      "expected_output": "Правка значения строки в исходных данных (strings) и пересборка, либо указание, что после запуска сайта это делается в «Языки → Перевод строк»; render/шаблоны не трогаются.",
+      "files": [],
+      "assertions": [
+        "Изменено значение ключа строки (fSubmit) в project/content/strings.js на всех языках, а не текст в PHP-разметке",
+        "Запущен или назван node wordpress/tools/build-content.js; сгенерированные файлы не правились руками",
+        "Упомянуто, что на работающем сайте текст меняется в админке («Языки → Перевод строк») или что форму CF7 нужно пересоздать импортом (--force) / поправить в CF7"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "slider-without-library",
+      "prompt": "Сделай на главной слайдер отзывов, как на сайте конкурента (там Swiper).",
+      "expected_output": "Блок темы с лентой scroll-snap и кнопками в site.js через init(root)+once(); без Swiper/Slick; плавная прокрутка в JS, а не scroll-behavior в CSS ленты; доступность кнопок.",
+      "files": [],
+      "assertions": [
+        "Не подключены Swiper, Slick, jQuery или другая библиотека слайдера",
+        "Разметка — блок темы; интерактив — раздел в assets/js/site.js внутри init(root) с once()",
+        "Не используется scroll-behavior: smooth в CSS ленты со scroll-snap (ломает замер LCP); плавность — scrollBy({behavior}) с учётом prefers-reduced-motion",
+        "Кнопки прокрутки — <button> с aria-label (через строки интерфейса)",
+        "Отзывы берутся из записей/данных, а не вписаны в разметку блока, если в проекте есть тип записи для отзывов (или предложено его завести)"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "legacy-landing-conversion",
+      "prompt": "Вот секция с лендинга на Bootstrap: <section class=\"py-5 bg-light\"><div class=\"container\"><h2 class=\"text-center\">Как мы работаем</h2><ol class=\"list-unstyled\"><li>Заявка</li><li>Оценка</li><li>Работа</li></ol></div></section>. Перенеси её на страницу «О нас».",
+      "expected_output": "Core-блоки: group section.acme-section > group.acme-wrap > heading + list со стилем «Шаги»; никаких классов Bootstrap и блока HTML.",
+      "files": [],
+      "assertions": [
+        "Результат — разметка core-блоков (<!-- wp:group -->, <!-- wp:heading -->, <!-- wp:list -->), а не блок core/html",
+        "Классы Bootstrap (py-5, bg-light, container, text-center, list-unstyled) не попали в разметку",
+        "Использованы классы проекта: acme-section (is-sunken для фона), acme-wrap, стиль списка is-style-steps",
+        "Разметка блоков каноническая (классы wp-block-*), так что блоки не станут недействительными в редакторе"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "redirect-old-url",
+      "prompt": "Старый адрес /uslugi/remont/ должен вести на услугу «Пример услуги».",
+      "expected_output": "Пара в redirects исходных данных с целью-ссылкой (key записи), проверка в CI (MAP) и legacy-urls.txt; срабатывает только на 404.",
+      "files": [],
+      "assertions": [
+        "Цель редиректа — ссылка на запись ({ key: 'example' } или { post: ID }), а не жёстко прописанный новый адрес",
+        "Добавлено в redirects (project/content/site.js) или в опцию acme_redirects через код/импорт, а не правилом в .htaccess",
+        "Пара добавлена в блок MAP в .github/workflows/ci.yml и/или в wordpress/tools/qa/legacy-urls.txt",
+        "Не предложен плагин редиректов"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "edit-template",
+      "prompt": "На страницах услуг уберите форму заявки внизу.",
+      "expected_output": "Правка файла templates/single-acme_service.html в git; явное предупреждение не править шаблон в редакторе сайта.",
+      "files": [],
+      "assertions": [
+        "Изменён файл wordpress/acme/templates/single-acme_service.html (удалён <!-- wp:acme/lead-form /-->)",
+        "Не предложено менять шаблон через «Внешний вид → Редактор» (шаблон из базы перекроет файл из git), или это прямо отмечено как нежелательное",
+        "Указано, что изменение уходит на сайт деплоем (ветка → CI → test → main → production)"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "deploy-request",
+      "prompt": "Выложи изменения на боевой сайт.",
+      "expected_output": "Агент не запускает production сам без подтверждения; описывает путь: PR в main, зелёный CI, Actions → Деплой → production из main; не предлагает SFTP.",
+      "files": [],
+      "assertions": [
+        "Не выполняет деплой production и не правит файлы на сервере без явного подтверждения владельца",
+        "Называет путь: ветка → PR в main → зелёный CI → Actions → Деплой → main, production",
+        "Не предлагает force_import на боевом и предупреждает, что он перезапишет правки в админке, если речь заходит о контенте",
+        "Не предлагает заливать файлы по SFTP/FTP"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "seo-schema-question",
+      "prompt": "Почему в разметке статьи автор не «admin», и как добавить ещё один профиль автора (LinkedIn)?",
+      "expected_output": "Объяснение фильтра rank_math/json_ld (автор — Person/Organization сайта, узел #author удаляется); профиль — через настройки сайта и social_additional_profiles (версия настроек SEO), без правки шаблонов.",
+      "files": [],
+      "assertions": [
+        "Объясняет, что автор заменяется фильтром rank_math/json_ld в wordpress/acme-core/inc/seo/schema.php",
+        "Предлагает добавить профиль через настройки (acme_settings → профили) и/или новую версию настроек ACME_SEO_VERSION, а не правкой выведенного JSON вручную",
+        "Упоминает, что настройки Rank Math после первой версии принадлежат админке (деплой их не перезапишет без --force или новой версии)"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "new-project-from-design",
+      "prompt": "Начинаем новый сайт для студии йоги «Prana», домен prana.studio, языки ru и en. Есть макет в Figma. С чего начнём?",
+      "expected_output": "Бриф, scaffold.js с slug/name/domain, правка языков (site.js, ACME_LANGS, remote.sh), токены из макета, порядок шагов из SKILL.md; без старта с установки плагинов-конструкторов.",
+      "files": [],
+      "assertions": [
+        "Предлагает развернуть каркас: node scripts/scaffold.js … --slug=prana (или похожий) --name=… --domain=prana.studio",
+        "Называет, где задаются языки: project/content/site.js, <SLUG>_LANGS в плагине, LOCALE/EXTRA_LOCALES в remote.sh",
+        "Первые шаги — бриф и токены из макета (tokens.css + theme.json), затем типы записей и блоки",
+        "Не предлагает конструктор страниц (Elementor и т.п.) и платные плагины полей",
+        "Упоминает окружения test/production и секреты для деплоя"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "readable-refactor",
+      "prompt": "Добавь в обработку заявки проверку: если в сообщении больше трёх ссылок — считать спамом. Функция acme_lead_is_spam уже большая, просто допиши туда условие.",
+      "expected_output": "Правило вынесено в отдельную чистую функцию с понятным именем и тестом; обработчик только вызывает её; пределы размера соблюдены; npm run check зелёный.",
+      "files": [],
+      "assertions": [
+        "Новое правило — отдельная функция (например, acme_lead_has_too_many_links( $message )) без обращения к базе и WordPress-объектам",
+        "Добавлен тест в wordpress/tools/tests/*.test.php с названием-фразой на русском («сообщение с четырьмя ссылками — спам»)",
+        "acme_lead_is_spam не превышает 40 строк и 3 уровня вложенности; агент не добавил phpcs:ignore ради пределов",
+        "Число 3 — именованная константа с комментарием «почему»",
+        "Имена переменных говорящие (без $m, $c, $l); комментарии объясняют причину, а не пересказывают код",
+        "Запущен или назван npm run check (и npm test)"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "editor-usability",
+      "prompt": "Клиент жалуется: в редакторе статьи не получается поменять заголовок H1, а шапка и форма заявки лезут поверх текста. Почини.",
+      "expected_output": "Записи открываются в обычном редакторе (без принудительного template-locked), H1 — только из шаблона и правится в поле заголовка; липкие и плавающие элементы в editor.css в обычном потоке; проверка editor-usability.js.",
+      "files": [],
+      "assertions": [
+        "Проверено, что ACME_TEMPLATE_MODE_POST_TYPES пуст (или убран принудительный default-mode template-locked) — запись открывается без шаблона",
+        "H1 не добавляется в текст или паттерн: он выводится core/post-title уровня 1 в шаблоне и правится в поле заголовка",
+        "Плавающий/липкий элемент приведён к классу .acme-is-sticky или добавлен в список editor.css, а не спрятан на сайте",
+        "Не удалены шапка и форма с сайта и не отключены стили сайта в редакторе целиком",
+        "Запущен или назван tools/qa/editor-usability.js (и editor-validity.js)"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "seo-new-page",
+      "prompt": "Добавь страницу «Гарантии» на двух языках, ссылку на неё в подвал, и чтобы она хорошо искалась.",
+      "expected_output": "Страница в project/content/site.js с латинским слагом и seoTitle/seoDescription/focusKeyword на обоих языках в нужных пределах длины; без H1 в тексте; пересборка; меню; при необходимости — проверка SEO-гейтом.",
+      "files": [],
+      "assertions": [
+        "Страница добавлена в project/content/site.js на ru и en, слаг — латиница, цифры и дефисы",
+        "seoTitle 10–60 и seoDescription 70–160 символов на каждом языке, не повторяют другие страницы; focusKeyword задан",
+        "Текст страницы начинается с H2 (H1 — из заголовка записи), у картинок есть alt",
+        "Запущен npm run build (build-content.js) — сборщик не выдал ошибок SEO-полей; сгенерированные файлы не правились руками",
+        "Ссылка в подвал — через меню (импорт меню или «Внешний вид → Меню»), а не разметкой в render.php",
+        "Не трогались настройки Rank Math в БД напрямую; для работающего сайта упомянуто, что новую страницу создают в админке (импорт с --force на боевом перезаписал бы правки владельца)"
+      ]
+    }
+  ]
+}

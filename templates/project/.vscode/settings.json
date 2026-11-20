@@ -1,0 +1,13 @@
+{
+  "search.exclude": {
+    "wordpress/acme-core/content/content.json": true,
+    "wordpress/acme-core/content/covers": true,
+    "wordpress/acme-core/content/media": true,
+    "wordpress/acme/inc/strings-data.php": true
+  },
+  "files.associations": {
+    "wordpress/acme/templates/*.html": "html",
+    "wordpress/acme/parts/*.html": "html"
+  },
+  "php.validate.run": "onSave"
+}

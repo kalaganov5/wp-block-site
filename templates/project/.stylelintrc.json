@@ -1,0 +1,22 @@
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "selector-class-pattern": [
+      "^(acme|wp|wpcf7|is|has|screen-reader|editor|block-editor|components|post-type)(-[a-z0-9_-]+)*$",
+      {
+        "message": "Класс темы начинается с acme-, состояние — с is- или has- (чужие: wp-, wpcf7-)"
+      }
+    ],
+    "declaration-block-single-line-max-declarations": 1,
+    "max-nesting-depth": 2,
+    "selector-max-id": 0,
+    "custom-property-pattern": null,
+    "no-descending-specificity": null,
+    "media-feature-range-notation": null,
+    "color-function-notation": null,
+    "alpha-value-notation": null,
+    "comment-empty-line-before": null,
+    "font-family-name-quotes": null,
+    "value-keyword-case": null
+  }
+}

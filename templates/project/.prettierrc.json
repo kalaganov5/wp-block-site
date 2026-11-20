@@ -1,0 +1,15 @@
+{
+  "singleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "overrides": [
+    {
+      "files": ["wordpress/acme/**", "wordpress/acme-core/**"],
+      "options": { "useTabs": true }
+    },
+    {
+      "files": ["*.css"],
+      "options": { "singleQuote": false, "printWidth": 120 }
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+/*
+ * Основа сайта: то, что нужно каждой странице и не принадлежит одному блоку — сброс, типографика, секции,
+ * раскладка статьи. Подключается на сайте и в редакторе (inc/setup.php, ACME_BASE_STYLES).
+ * Порядок файлов: fonts → tokens → base → core-blocks → components → стили блоков (blocks/<имя>/style.css).
+ * Правило: отступы между элементами задаёт сетка родителя (gap), а не поля элементов.
+ */
+
+/* ---------- Основа ---------- */
+:root {
+	--acme-gut: clamp(16px, 4vw, 24px);
+	--acme-sec: clamp(48px, 8vw, 96px);
+
+	color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+	color-scheme: dark;
+}
+
+html {
+	scroll-padding-top: calc(var(--header-height) + 8px);
+}
+
+body {
+	margin: 0;
+	background: var(--surface);
+	color: var(--ink);
+	font-family: var(--font-sans);
+	font-size: 16px;
+	line-height: 1.6;
+
+	/* Пресеты палитры WordPress следуют теме (светлая / тёмная): классы has-*-color берут переменные токенов. */
+	--wp--preset--color--surface: var(--surface);
+	--wp--preset--color--surface-raised: var(--surface-raised);
+	--wp--preset--color--surface-sunken: var(--surface-sunken);
+	--wp--preset--color--line: var(--line);
+	--wp--preset--color--ink: var(--ink);
+	--wp--preset--color--ink-muted: var(--ink-muted);
+	--wp--preset--color--accent: var(--accent);
+	--wp--preset--color--accent-soft: var(--accent-soft);
+	--wp--preset--color--on-accent: var(--on-accent);
+	--wp--preset--color--success: var(--success);
+	--wp--preset--color--success-soft: var(--success-soft);
+	--wp--preset--color--signal: var(--signal);
+	--wp--preset--color--signal-soft: var(--signal-soft);
+	--wp--preset--color--danger: var(--danger);
+}
+
+[hidden] {
+	display: none !important;
+}
+
+a {
+	color: var(--link);
+}
+
+a:hover {
+	color: var(--accent-hover);
+}
+
+:focus-visible {
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+.screen-reader-text {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+/* ---------- Секции и типографика ---------- */
+.acme-main :where(p, h1, h2, h3, h4, h5, h6, ul, ol, dl, figure, blockquote) {
+	margin: 0;
+}
+
+.acme-main {
+	display: block;
+	outline: none;
+}
+
+.acme-wrap {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: calc(var(--container) + 2 * var(--acme-gut));
+	margin: 0 auto;
+	padding: 0 var(--acme-gut);
+}
+
+.acme-section {
+	padding: var(--acme-sec) 0;
+}
+
+.acme-section.is-sunken {
+	background: var(--surface-sunken);
+}
+
+.acme-section > .acme-wrap,
+.acme-stack-16,
+.acme-stack-32 {
+	display: grid;
+	align-content: start;
+}
+
+.acme-section > .acme-wrap {
+	gap: var(--space-5);
+}
+
+.acme-stack-16 {
+	gap: var(--space-4);
+}
+
+.acme-stack-32 {
+	gap: var(--space-6);
+}
+
+.acme-content > .acme-prose,
+.acme-prose {
+	display: grid;
+	gap: var(--space-4);
+	max-width: var(--measure);
+}
+
+.acme-prose > h2 {
+	margin-top: var(--space-5);
+}
+
+h1,
+h2,
+h3 {
+	line-height: 1.2;
+	text-wrap: balance;
+	letter-spacing: -0.01em;
+}
+
+h1 {
+	font-size: clamp(32px, 5vw, 44px);
+}
+
+h2 {
+	font-size: clamp(24px, 3.2vw, 32px);
+}
+
+h3 {
+	font-size: 19px;
+}
+
+.acme-lead {
+	font-size: 19px;
+	color: var(--ink-muted);
+	max-width: var(--measure);
+}
+
+p,
+li {
+	hyphens: auto;
+}
+
+/* Прилипающая колонка (оглавление, боковая панель): едет за прокруткой под шапкой.
+   В редакторе выключена (editor.css): там она закрывала бы текст. Для прилипания используйте этот класс,
+   а не свой position: sticky. */
+.acme-is-sticky {
+	position: sticky;
+	top: calc(var(--header-height) + var(--space-4));
+	align-self: start;
+}
+
+/* ---------- Заголовок страницы ---------- */
+
+/* H1 выводит шаблон (core/post-title), а не содержимое: заголовок правится в одном месте — в поле «Заголовок».
+   Отступы подобраны так, чтобы H1 и первая секция содержимого читались как один первый экран. */
+.acme-page-head {
+	padding-top: var(--acme-sec);
+}
+
+.acme-page-head + .acme-content > .acme-section:first-child {
+	padding-top: var(--space-5);
+}
+
+/* Текстовая страница (первая секция — узкая колонка .acme-prose): заголовок встаёт в ту же колонку,
+   а не к левому краю контейнера. */
+.acme-page-head:has(+ .acme-content > .acme-section:first-child > .acme-prose) {
+	max-width: var(--measure);
+}
+
+/* ---------- Статья ---------- */
+.acme-article {
+	display: grid;
+	gap: var(--space-5);
+
+	/* Только сверху и снизу: боковые поля статье даёт .acme-wrap, сокращённая запись padding их бы обнулила. */
+	padding-block: var(--space-6);
+}
+
+.acme-article :where(pre, table) {
+	max-width: 100%;
+	overflow-x: auto;
+}

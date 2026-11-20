@@ -1,0 +1,5 @@
+/* Карточки-ссылки: только своё. Сама карточка (.acme-card) общая с post-card — assets/css/components.css. */
+.acme-card.is-urgent {
+	background: var(--signal-soft);
+	border-color: var(--signal);
+}

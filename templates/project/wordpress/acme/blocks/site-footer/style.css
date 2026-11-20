@@ -1,0 +1,55 @@
+/* Подвал сайта и окно cookie (оно выводится вместе с подвалом). */
+
+/* ---------- Подвал ---------- */
+.acme-footer {
+	margin-top: var(--acme-sec);
+	padding: var(--space-7) 0;
+	background: var(--surface-sunken);
+	font-size: 15px;
+}
+
+.acme-footer__in {
+	display: grid;
+	gap: var(--space-5);
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.acme-footer ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: var(--space-2);
+}
+
+.acme-footer a {
+	color: var(--ink);
+}
+
+.acme-footer__copy {
+	color: var(--ink-muted);
+	font-size: 13px;
+}
+
+/* ---------- Окно cookie ---------- */
+.acme-cookie {
+	position: fixed;
+	z-index: 60;
+	left: var(--acme-gut);
+	right: var(--acme-gut);
+	bottom: var(--acme-gut);
+	max-width: 520px;
+	padding: var(--space-5);
+	background: var(--surface-raised);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-pop);
+	display: grid;
+	gap: var(--space-3);
+}
+
+.acme-cookie__row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+}

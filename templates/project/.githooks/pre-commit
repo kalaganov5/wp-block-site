@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Перед каждым коммитом: нет ли секретов в добавленных файлах и проходит ли npm run check.
+# Хук подключается сам при npm install (скрипт prepare → wordpress/tools/git-hooks.js).
+# Пропустить один раз в крайнем случае: git commit --no-verify (CI всё равно проверит).
+set -euo pipefail
+
+bash wordpress/tools/scan-secrets.sh --staged
+npm run --silent check

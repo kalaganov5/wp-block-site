@@ -1,0 +1,29 @@
+{
+  "name": "acme-site",
+  "private": true,
+  "description": "Инструменты разработки Acme Site: проверки кода, сборщики, QA. На сервер не попадает — тема и плагин работают без сборки.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "node wordpress/tools/check.js",
+    "format": "prettier --write . && stylelint --fix \"wordpress/acme/**/*.css\" && node wordpress/tools/format-php.js",
+    "format:check": "prettier --check .",
+    "lint:js": "eslint .",
+    "lint:css": "stylelint \"wordpress/acme/**/*.css\"",
+    "lint:php": "php vendor/bin/phpcs -q",
+    "test": "node wordpress/tools/check.js tests",
+    "build": "node wordpress/tools/build-content.js",
+    "prepare": "node wordpress/tools/git-hooks.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^16.0.0",
+    "node-html-parser": "^6.1.13",
+    "playwright": "^1.65.1",
+    "prettier": "^3.0.0",
+    "stylelint": "^16.0.0",
+    "stylelint-config-standard": "^38.0.0"
+  }
+}

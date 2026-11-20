@@ -1,0 +1,38 @@
+# Подключение к хостингу по SSH: ключ (SSH_KEY) или пароль (SSH_PASSWORD через sshpass).
+# Записывает в окружение SSH_CMD — команду ssh с нужными параметрами.
+name: SSH к хостингу
+description: Готовит known_hosts и SSH_CMD для деплоя и синхронизации
+inputs:
+  host: { required: true }
+  port: { required: false, default: '22' }
+  key: { required: false, default: '' }
+  password: { required: false, default: '' }
+  known_hosts: { required: false, default: '' }
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        SSH_HOST: ${{ inputs.host }}
+        SSH_PORT: ${{ inputs.port }}
+        SSH_KEY: ${{ inputs.key }}
+        SSH_PASSWORD: ${{ inputs.password }}
+        SSH_KNOWN_HOSTS: ${{ inputs.known_hosts }}
+      run: |
+        mkdir -p ~/.ssh && chmod 700 ~/.ssh
+        if [ -n "$SSH_KNOWN_HOSTS" ]; then
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        else
+          ssh-keyscan -p "$SSH_PORT" -T 20 "$SSH_HOST" > ~/.ssh/known_hosts
+          echo "::notice::Отпечаток сервера взят при подключении. Для защиты от подмены сохраните строку ниже в секрет SSH_KNOWN_HOSTS:"
+          cat ~/.ssh/known_hosts
+        fi
+        if [ -n "$SSH_KEY" ]; then
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          echo "SSH_CMD=ssh -i $HOME/.ssh/id_deploy -p $SSH_PORT -o BatchMode=yes -o ServerAliveInterval=30" >> "$GITHUB_ENV"
+        elif [ -n "$SSH_PASSWORD" ]; then
+          sudo apt-get install -y -qq sshpass > /dev/null
+          echo "SSH_CMD=sshpass -e ssh -p $SSH_PORT -o PubkeyAuthentication=no -o ServerAliveInterval=30" >> "$GITHUB_ENV"
+        else
+          echo "::error::Нет ни SSH_KEY, ни SSH_PASSWORD"; exit 1
+        fi

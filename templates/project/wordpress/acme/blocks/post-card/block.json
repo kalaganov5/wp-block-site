@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "acme/post-card",
+	"title": "Карточка записи",
+	"category": "acme",
+	"description": "Карточка в списке записей: картинка записи, рубрика, заголовок, отрывок, ссылка. Используется внутри «Цикла запросов».",
+	"textdomain": "acme",
+	"attributes": {},
+	"usesContext": ["postId", "postType"],
+	"supports": {
+		"html": false,
+		"customClassName": false,
+		"reusable": false
+	},
+	"editorScript": "acme-editor",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

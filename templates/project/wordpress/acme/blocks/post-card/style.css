@@ -1,0 +1,9 @@
+/* Карточка записи: только своё — картинка записи. Сама карточка (.acme-card) — assets/css/components.css. */
+
+/* Кадр 16:9 задаёт CSS, а не отдельный размер картинки: у всех карточек одна высота при любых исходниках. */
+.acme-card__image {
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	object-fit: cover;
+	border-radius: var(--radius-md);
+}

@@ -1,0 +1,15 @@
+/* simple. */
+.acme-simple__list {
+	display: grid;
+	gap: var(--space-4);
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.acme-simple__item {
+	display: grid;
+	gap: var(--space-2);
+	padding: var(--space-5);
+	background: var(--surface-raised);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-lg);
+}

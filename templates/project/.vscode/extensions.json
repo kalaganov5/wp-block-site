@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "EditorConfig.EditorConfig",
+    "bmewburn.vscode-intelephense-client",
+    "johnbillion.vscode-wordpress-hooks",
+    "timonwong.shellcheck",
+    "redhat.vscode-yaml",
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github"
+  ]
+}

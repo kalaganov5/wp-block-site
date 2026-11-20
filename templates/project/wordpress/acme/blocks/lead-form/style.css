@@ -1,0 +1,78 @@
+/* Форма заявки (Contact Form 7). */
+.acme-form .wpcf7-form {
+	display: grid;
+	gap: var(--space-5);
+	max-width: 560px;
+}
+
+.acme-form label {
+	display: grid;
+	gap: var(--space-1);
+	font-weight: 500;
+}
+
+.acme-form .wpcf7-acceptance label {
+	display: flex;
+	gap: var(--space-2);
+	align-items: flex-start;
+	font-weight: 400;
+}
+
+.acme-form .wpcf7-list-item {
+	margin: 0;
+}
+
+.acme-form .wpcf7-acceptance input {
+	margin-top: 0.35em;
+}
+
+.acme-form :where(input[type="text"], input[type="email"], input[type="tel"], textarea) {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: var(--control-height);
+	padding: var(--space-3);
+	border: 1px solid var(--line-strong);
+	border-radius: var(--radius-md);
+	background: var(--surface-raised);
+	color: var(--ink);
+	font: inherit;
+}
+
+.acme-form .wpcf7-not-valid {
+	border-color: var(--danger);
+}
+
+/* Подсказка об ошибке не занимает места в потоке: она появляется и исчезает, пока человек заполняет
+   форму. Если бы она сдвигала поля, галочка согласия уезжала бы из-под курсора в момент клика
+   (нажал — поле выше потеряло фокус — подсказка исчезла — клик пришёлся мимо). Место под неё — отступ
+   между полями (.wpcf7-form gap), поэтому тексты ошибок короткие, в одну строку. */
+.acme-form .wpcf7-form-control-wrap {
+	position: relative;
+	display: block;
+}
+
+.acme-form .wpcf7-not-valid-tip {
+	position: absolute;
+	top: calc(100% + 2px);
+	left: 0;
+	color: var(--danger);
+	font-size: 13px;
+	line-height: 1.2;
+}
+
+.acme-form .acme-hp {
+	position: absolute;
+	left: -9999px;
+}
+
+.acme-form .wpcf7-submit {
+	min-height: var(--control-height);
+	padding: 0 var(--space-6);
+	border: 0;
+	border-radius: var(--radius-md);
+	background: var(--accent);
+	color: var(--on-accent);
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+}

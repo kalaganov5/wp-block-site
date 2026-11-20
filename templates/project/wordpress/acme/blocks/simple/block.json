@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "acme/simple",
+	"title": "simple",
+	"category": "acme",
+	"description": "simple. Описание для редактора: что выводит блок и откуда берёт данные.",
+	"textdomain": "acme",
+	"attributes": {
+		"title": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"customClassName": false,
+		"reusable": false
+	},
+	"editorScript": "acme-editor",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

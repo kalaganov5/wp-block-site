@@ -1,0 +1,26 @@
+# Отступы как в коде проекта: тема, плагин и скрипты деплоя — табы (стиль WordPress),
+# сборщики в wordpress/tools и YAML — два пробела. VS Code применяет это через расширение EditorConfig.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[wordpress/{acme,acme-core}/**]
+indent_style = tab
+
+[*.sh]
+indent_style = tab
+
+[wordpress/tools/**.js]
+indent_style = space
+indent_size = 2
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

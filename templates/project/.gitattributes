@@ -1,0 +1,8 @@
+# Скрипты запускаются в Linux (хостинг, Docker): переносы строк только LF, даже при клоне на Windows.
+*.sh   text eol=lf
+*.conf text eol=lf
+Dockerfile text eol=lf
+# Их читает bash: с переносами Windows (CRLF) пути и переменные получили бы невидимый символ в конце.
+wordpress/deploy/pages.txt text eol=lf
+*.env.example text eol=lf
+.githooks/* text eol=lf

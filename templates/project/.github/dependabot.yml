@@ -1,0 +1,38 @@
+# Обновления зависимостей — раз в неделю, одним PR на каждую группу (а не десятком мелких).
+# PR проходит тот же CI, что любое изменение: обновление линтера или action, которое что-то ломает, видно до слияния.
+# Здесь только инструменты разработки и CI: на сервер из них ничего не попадает (тема и плагин — без сборки).
+# Плагины WordPress на сайте обновляются отдельно: сначала на тестовом, затем на боевом (wordpress/README.md).
+version: 2
+updates:
+  # Actions в workflow закреплены по SHA коммита — Dependabot обновляет SHA и комментарий с версией.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+
+  # Линтеры и инструменты QA (package.json).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      npm:
+        patterns: ['*']
+
+  # PHPCS и стандарты (composer.json).
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      composer:
+        patterns: ['*']
+
+  # Образ локального сайта (wordpress/local/Dockerfile).
+  - package-ecosystem: docker
+    directory: /wordpress/local
+    schedule:
+      interval: weekly

@@ -1,0 +1,141 @@
+# Деплой на хостинг по SSH.
+#   push в main → тестовый сайт;
+#   вручную (Actions → Деплой → Run workflow) → test или production. Боевой — только из ветки main.
+#   Галочки: перезалить импортированный контент, не проверять страницы после выкладки, откатить.
+# После выкладки проверяются страницы из wordpress/deploy/pages.txt. Не открываются — предыдущая версия темы и
+# плагина возвращается автоматически, запуск завершается ошибкой, в сводке (Summary) написано, что произошло.
+# Откат вручную: Run workflow → галочка rollback (CI при этом не запускается: откат не должен ждать проверок).
+# Секреты — в окружениях Settings → Environments → test и production (одинаковые имена, свои значения;
+# список — wordpress/README.md, раздел «Деплой»). Общие секреты репозитория не используйте.
+# Тот же деплой без GitHub Actions: bash wordpress/deploy/manual.sh test|production.
+name: Деплой
+
+on:
+  push:
+    branches: [main]
+    paths: ['wordpress/**', '.github/workflows/**', '.github/actions/**']
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Куда выкладывать
+        type: choice
+        options: [test, production]
+        default: test
+      force_import:
+        description: Перезаписать импортированный контент (content.json) (правки в админке в импортированных записях пропадут)
+        type: boolean
+        default: false
+      skip_check:
+        description: Не проверять страницы после выкладки (сайт готовится в папке, на которую домен ещё не смотрит)
+        type: boolean
+        default: false
+      rollback:
+        description: Не выкладывать, а вернуть предыдущую версию темы и плагина (базу откат не трогает)
+        type: boolean
+        default: false
+
+# Минимальные права: workflow только читает репозиторий.
+permissions:
+  contents: read
+
+# Два деплоя на один сайт не идут одновременно; идущий не отменяется (оборванный деплой — сломанный сайт).
+concurrency:
+  group: deploy-${{ inputs.target || 'test' }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    if: ${{ !inputs.rollback }}
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: ${{ inputs.rollback && 'Откат' || 'Выкладка' }} (${{ inputs.target || 'test' }})
+    needs: ci
+    # Деплой — только после зелёного CI; откат — без CI (job ci при нём пропущен).
+    if: ${{ !cancelled() && (needs.ci.result == 'success' || (inputs.rollback && needs.ci.result == 'skipped')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.target || 'test' }}
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      SITE_URL: ${{ secrets.SITE_URL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Проверка ключей
+        env:
+          DB_NAME: ${{ secrets.DB_NAME }}
+          TARGET: ${{ inputs.target || 'test' }}
+          PROD_HOST: acme.example # боевой домен: тестовый деплой не должен на него смотреть
+        run: |
+          if [ "$TARGET" = production ] && [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error::Боевой сайт выкладывается только из ветки main: сначала проверьте изменения на тестовом и слейте ветку в main."
+            exit 1
+          fi
+          # Защита от перепутанных ключей: секрет, которого нет в окружении, GitHub берёт из общих (тестовых).
+          host=$(printf '%s' "$SITE_URL" | sed -E 's#^https?://##; s#/.*##')
+          if [ "$TARGET" = production ] && { [ -z "$host" ] || printf '%s' "$host" | grep -qiE '^dev\.'; }; then
+            echo "::error::Окружение production: SITE_URL = «$host» — это тестовый адрес или он пуст. Задайте секреты боевого сайта в Settings → Environments → production."
+            exit 1
+          fi
+          if [ "$TARGET" = production ] && printf '%s' "$DEPLOY_PATH" | grep -qiE '(^|/)dev\.'; then
+            echo "::error::Окружение production: DEPLOY_PATH указывает на папку тестового сайта. Задайте DEPLOY_PATH в Settings → Environments → production."
+            exit 1
+          fi
+          if [ "$TARGET" != production ] && { [ "$host" = "$PROD_HOST" ] || [ "$host" = "www.$PROD_HOST" ]; }; then
+            echo "::error::Тестовый деплой смотрит на боевой адрес $host. Боевые ключи храните только в окружении production."
+            exit 1
+          fi
+          miss=""
+          for v in SSH_HOST SSH_USER DEPLOY_PATH SITE_URL; do [ -n "${!v}" ] || miss="$miss $v"; done
+          [ -n "$SSH_KEY$SSH_PASSWORD" ] || miss="$miss SSH_KEY(или SSH_PASSWORD)"
+          if [ -n "$miss" ]; then
+            echo "::error::Не заданы секреты:$miss. Settings → Environments → ${TARGET} → Add environment secret. Список — wordpress/README.md, раздел «Деплой»."
+            exit 1
+          fi
+          [ -n "$DB_NAME" ] || echo "::notice::DB_NAME не задан — нужен только для первой установки WordPress."
+
+      - name: SSH
+        uses: ./.github/actions/ssh
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          key: ${{ secrets.SSH_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      # Пакет → сервер → remote.sh → проверка страниц → откат при неудаче: всё в deploy.sh, общем с ручным деплоем.
+      - name: ${{ inputs.rollback && 'Откат и проверка страниц' || 'Выкладка, проверка страниц, откат при неудаче' }}
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          ADMIN_USER: ${{ secrets.ADMIN_USER }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          PHP_BIN: ${{ secrets.PHP_BIN }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          NOINDEX: ${{ secrets.NOINDEX }}
+          SITE_ENV: ${{ inputs.target || 'test' }}
+          FORCE_IMPORT: ${{ inputs.force_import && '1' || '0' }}
+          SKIP_CHECK: ${{ inputs.skip_check && '1' || '0' }}
+          ROLLBACK: ${{ inputs.rollback && '1' || '0' }}
+          # Необязательные переменные окружения (не секреты): Settings → Environments → <окружение> → Variables.
+          PAGE_CACHE: ${{ vars.PAGE_CACHE }} # 0 — выключить кеш страниц (по умолчанию включён)
+          AUTO_UPDATE_PLUGINS: ${{ vars.AUTO_UPDATE_PLUGINS }} # 1 — автообновление плагинов из каталога
+          PROBE_URL: ${{ vars.PROBE_URL }} # адрес, по которому сервер видит сам себя, если не по SITE_URL
+        run: bash wordpress/deploy/deploy.sh
+
+      - name: Защита сайта (предупреждения, деплой не останавливают)
+        if: ${{ !inputs.skip_check && !inputs.rollback }}
+        run: bash wordpress/deploy/hardening-check.sh "$SITE_URL"

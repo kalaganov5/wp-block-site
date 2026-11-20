@@ -1,0 +1,155 @@
+/*
+ * Core-блоки в стиле дизайн-системы: кнопки, списки, карточка-группа, вопросы-ответы, таблицы.
+ * Варианты is-style-* регистрирует inc/blocks.php (acme_register_block_styles).
+ */
+
+.wp-block-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-3);
+}
+
+.wp-block-button__link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: var(--control-height);
+	padding: 0 var(--space-5);
+	border-radius: var(--radius-md);
+	font-weight: 600;
+	text-decoration: none;
+	border: 1px solid transparent;
+}
+
+.wp-block-button.is-style-primary .wp-block-button__link,
+.wp-block-button:not([class*="is-style-"]) .wp-block-button__link {
+	background: var(--accent);
+	color: var(--on-accent);
+}
+
+.wp-block-button.is-style-primary .wp-block-button__link:hover {
+	background: var(--accent-hover);
+}
+
+.wp-block-button.is-style-secondary .wp-block-button__link {
+	background: transparent;
+	color: var(--ink);
+	border-color: var(--line-strong);
+}
+
+.wp-block-button.is-style-ghost .wp-block-button__link {
+	background: none;
+	color: var(--link);
+	padding: 0;
+	min-height: 0;
+}
+
+.is-style-facts {
+	list-style: none;
+	padding: 0;
+	display: grid;
+	gap: var(--space-2);
+}
+
+.is-style-facts li {
+	position: relative;
+	padding-left: 28px;
+}
+
+.is-style-facts li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.45em;
+	width: 14px;
+	height: 8px;
+	border: solid var(--success);
+	border-width: 0 0 2px 2px;
+	transform: rotate(-45deg);
+}
+
+.is-style-steps {
+	counter-reset: step;
+	list-style: none;
+	padding: 0;
+	display: grid;
+	gap: var(--space-4);
+}
+
+.is-style-steps li {
+	counter-increment: step;
+	position: relative;
+	padding-left: 44px;
+}
+
+.is-style-steps li::before {
+	content: counter(step);
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--radius-pill);
+	display: grid;
+	place-items: center;
+	background: var(--accent-soft);
+	color: var(--accent);
+	font-weight: 700;
+}
+
+.wp-block-group.is-style-card {
+	background: var(--surface-raised);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-lg);
+	padding: var(--space-5);
+	box-shadow: var(--shadow-card);
+	display: grid;
+	gap: var(--space-3);
+}
+
+.wp-block-details {
+	border-bottom: 1px solid var(--line);
+	padding: var(--space-3) 0;
+}
+
+.wp-block-details summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.wp-block-table table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.wp-block-table :where(th, td) {
+	border-bottom: 1px solid var(--line);
+	padding: var(--space-3);
+	text-align: left;
+	vertical-align: top;
+}
+
+@media (max-width: 759.98px) {
+	.wp-block-table.is-style-stack thead {
+		display: none;
+	}
+
+	.wp-block-table.is-style-stack :where(tr, td) {
+		display: block;
+	}
+
+	.wp-block-table.is-style-stack tr {
+		border-bottom: 1px solid var(--line);
+		padding: var(--space-3) 0;
+	}
+
+	.wp-block-table.is-style-stack td {
+		border: 0;
+		padding: var(--space-1) 0;
+	}
+
+	.wp-block-table.is-style-stack td[data-label]::before {
+		content: attr(data-label) ": ";
+		color: var(--ink-muted);
+	}
+}

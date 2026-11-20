@@ -1,0 +1,21 @@
+/* Хлебные крошки. */
+.acme-crumbs ol {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	padding: var(--space-4) 0 0;
+	margin: 0;
+	font-size: 13px;
+	color: var(--ink-muted);
+}
+
+.acme-crumbs li + li::before {
+	content: "/";
+	margin-right: var(--space-2);
+	color: var(--line-strong);
+}
+
+.acme-crumbs a {
+	color: inherit;
+}

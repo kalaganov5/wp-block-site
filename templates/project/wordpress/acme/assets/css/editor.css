@@ -1,0 +1,96 @@
+/*
+ * Редактор: только поправки холста. Всё остальное — те же стили, что на сайте (add_editor_style в inc/setup.php
+ * и style.css блоков).
+ *
+ * Главное правило: на холсте ничто не плавает и не прилипает. Шапка, окно cookie, мобильное меню и любые
+ * закреплённые колонки на сайте лежат поверх страницы; в редакторе они закрывали бы текст и забирали клики.
+ * Добавили на сайт элемент с position: sticky или fixed — добавьте его в список ниже
+ * (проверяет tools/qa/editor-usability.js: на холсте не должно быть ни одного такого элемента).
+ */
+.editor-styles-wrapper {
+	background: var(--surface);
+	color: var(--ink);
+	font-family: var(--font-sans);
+}
+
+.editor-styles-wrapper .is-root-container > * {
+	max-width: none;
+}
+
+/* ---------- Обычный режим: поле «Заголовок» и текст, без шаблона ---------- */
+
+/* На сайте поля и ширину заголовку и тексту дают блоки шаблона (.acme-wrap, .acme-main). В обычном режиме
+   шаблона нет, поэтому повторяем главное здесь — иначе заголовок и текст прижаты к левому краю холста. */
+.editor-styles-wrapper .editor-visual-editor__post-title-wrapper {
+	box-sizing: border-box;
+	max-width: calc(var(--container) + 2 * var(--acme-gut));
+	margin: 0 auto;
+	padding: var(--space-7) var(--acme-gut) 0;
+}
+
+.editor-styles-wrapper .editor-visual-editor__post-title-wrapper > * {
+	margin: 0;
+}
+
+/* Как .acme-main на сайте: интервалы задаёт сетка секции, а не поля абзацев и заголовков. */
+.editor-styles-wrapper .is-root-container :where(p, h1, h2, h3, h4, h5, h6, ul, ol, dl, figure, blockquote) {
+	margin: 0;
+}
+
+/* Первая секция продолжает заголовок, как на сайте (base.css, «Заголовок страницы»). */
+.editor-styles-wrapper .editor-visual-editor__post-title-wrapper + .is-root-container > .acme-section:first-child {
+	padding-top: var(--space-5);
+}
+
+/* Запись блога: текст — узкая колонка статьи, как .acme-wrap > .acme-prose в шаблоне single.html.
+   В режиме с шаблоном корень холста — не содержимое записи, и правило не срабатывает. */
+.editor-styles-wrapper.post-type-post > .is-root-container.wp-block-post-content {
+	box-sizing: border-box;
+	display: grid;
+	gap: var(--space-4);
+	max-width: calc(var(--container) + 2 * var(--acme-gut));
+	margin: 0 auto;
+	padding: var(--space-5) var(--acme-gut) var(--space-7);
+}
+
+.editor-styles-wrapper.post-type-post > .is-root-container.wp-block-post-content > * {
+	max-width: var(--measure);
+}
+
+/* ---------- Режим с шаблоном ---------- */
+
+/* Прилипающее — в обычный поток: шапка стоит над текстом, а не едет за прокруткой поверх него. */
+.editor-styles-wrapper .acme-header,
+.editor-styles-wrapper .acme-is-sticky {
+	position: static !important;
+}
+
+/* Плавающее и закреплённое на холсте не нужно совсем: окно cookie и мобильное меню. */
+.editor-styles-wrapper [data-acme-cookie],
+.editor-styles-wrapper .acme-mnav {
+	display: none !important;
+}
+
+/* Панель «Настройки блока» (assets/js/editor.js). */
+.acme-ed-list,
+.acme-ed-obj {
+	display: grid;
+	gap: 8px;
+	margin: 12px 0;
+}
+
+/* Подпись на месте пустого блока темы: видна только в редакторе, на сайте пустой блок не выводит ничего. */
+.acme-ed-empty {
+	padding: 4px 12px;
+	border: 1px dashed currentColor;
+	font:
+		13px/1.4 system-ui,
+		sans-serif;
+	opacity: 0.6;
+}
+
+/* Редактор показывает пробелы как есть (pre-wrap): заголовки переносятся иначе, чем на сайте.
+   Текст, который сейчас не правится, переносится как на сайте. */
+.editor-styles-wrapper .block-editor-rich-text__editable:not(:focus) {
+	white-space: normal !important;
+}

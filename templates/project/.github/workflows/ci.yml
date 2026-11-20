@@ -1,0 +1,145 @@
+# Проверки: npm run check (синтаксис, оформление, пределы размера, безопасность, тесты) и установка с нуля —
+# скрипт развёртывания ставит рабочий сайт (WordPress + MySQL в контейнере, тот же remote.sh, что на хостинге).
+#
+# Сторонние actions закреплены по полному SHA коммита (версия — в комментарии справа): тег автор может
+# переставить на другой код, SHA — нет. Обновляет их Dependabot (.github/dependabot.yml).
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+# Минимальные права: workflow только читает репозиторий.
+permissions:
+  contents: read
+
+# Новый push в ту же ветку отменяет проверку предыдущего. Запуск из деплоя (workflow_call) не отменяется
+# никогда: у него своя группа по номеру запуска, иначе ручной боевой деплой и деплой по push отменяли бы друг друга.
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow == 'CI' && 'push' || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Проверка кода
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Вся история: поиск секретов проверяет каждый коммит, а не только последний.
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          # Минимальная поддерживаемая версия PHP (та же, что в style.css темы и шапке плагина): php -l поймает
+          # синтаксис, которого в ней ещё нет. Понижаете минимум — поменяйте и здесь, и в матрице ниже.
+          php-version: '8.3'
+          tools: composer
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Инструменты проверки (версии — из package-lock.json и composer.lock)
+        # Версии зафиксированы lock-файлами: новая версия линтера не должна ронять CI сама по себе.
+        run: |
+          npm ci
+          composer install --no-interaction --no-progress
+      - name: Секреты в истории git
+        run: bash wordpress/tools/scan-secrets.sh
+      - name: npm run check — та же команда, что перед коммитом
+        # Синтаксис, оформление, пределы размера, безопасность PHP, граница темы и плагина, тесты, shellcheck.
+        run: npm run check
+
+  e2e:
+    name: Установка с нуля (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    needs: check
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # Минимальная поддерживаемая версия PHP и актуальная (на ней работает локальный Docker).
+        php: ['8.3', '8.4']
+    services:
+      mysql:
+        # MySQL 8.4 LTS (8.0 снят с поддержки в 2026). Локальный Docker — на MariaDB: проверены обе базы.
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wp
+          MYSQL_USER: wp
+          MYSQL_PASSWORD: wp
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -h 127.0.0.1" --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DEPLOY_PATH: /tmp/site
+      SITE_URL: http://127.0.0.1:8080
+      PACKAGE: /tmp/acme-package.tgz
+      SITE_ENV: test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, gd, intl
+          tools: none
+      - name: Первый запуск remote.sh (установка)
+        env:
+          DB_NAME: wp
+          DB_USER: wp
+          DB_PASSWORD: wp
+          DB_HOST: 127.0.0.1
+          ADMIN_USER: admin
+          ADMIN_PASSWORD: admin-ci-only
+          ADMIN_EMAIL: ci@example.com
+        run: |
+          tar -czf "$PACKAGE" -C wordpress acme acme-core
+          bash wordpress/deploy/remote.sh
+      - name: Повторный запуск (обновление — должен пройти без ошибок и ничего не дублировать)
+        run: |
+          tar -czf "$PACKAGE" -C wordpress acme acme-core
+          bash wordpress/deploy/remote.sh | tee /tmp/second.log
+          grep -q 'Контент уже импортирован' /tmp/second.log
+          grep -q 'Файлы темы и плагина не изменились' /tmp/second.log
+      - name: Запуск сайта
+        run: |
+          # Проверяем как боевой сайт: на тестовом noindex, и Rank Math не выводит canonical, robots.txt не открывает ботов ИИ.
+          php "$HOME/.local/bin/wp-cli.phar" --path="$DEPLOY_PATH" option update blog_public 1
+          # Встроенный сервер PHP: существующие файлы — как есть, остальное — в index.php (как ЧПУ в .htaccess).
+          cat > /tmp/router.php <<'PHP'
+          <?php
+          $p = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+          if ($p !== '/' && file_exists('/tmp/site' . $p) && !is_dir('/tmp/site' . $p)) return false;
+          $_SERVER['SCRIPT_NAME'] = '/index.php';
+          require '/tmp/site/index.php';
+          PHP
+          php -S 127.0.0.1:8080 -t "$DEPLOY_PATH" /tmp/router.php > /tmp/php.log 2>&1 &
+          sleep 2
+      - name: Страницы открываются (список — wordpress/deploy/pages.txt)
+        run: bash wordpress/deploy/smoke.sh "$SITE_URL"
+      - name: Контракт страниц (404, редиректы, описание, JSON-LD, карта сайта, robots.txt, llms.txt)
+        run: bash wordpress/deploy/contract.sh "$SITE_URL"
+
+      # SEO-гейт: обход установленного сайта; падает на том, что ломает индексацию (страница из карты не 200,
+      # нет title или description, битая внутренняя ссылка, noindex на открытом сайте). Правила —
+      # wordpress/tools/qa/lib/seo-gate-rules.js. Сайт к этому шагу открыт для поисковиков (blog_public = 1).
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - name: SEO-гейт
+        run: |
+          npm ci
+          node wordpress/tools/qa/seo-gate.js "$SITE_URL" --public
+
+      - name: В журнале PHP нет фатальных ошибок
+        if: ${{ !cancelled() }}
+        run: |
+          if grep -i 'fatal' /tmp/php.log; then
+            echo "::error::фатальная ошибка PHP при открытии страниц (строки — выше)"
+            exit 1
+          fi

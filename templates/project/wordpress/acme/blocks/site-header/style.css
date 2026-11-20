@@ -1,0 +1,107 @@
+/* Шапка сайта и мобильное меню. Шапка есть на каждой странице: размер файла входит в бюджет (tools/check.js). */
+
+/* ---------- Шапка ---------- */
+.acme-header {
+	position: sticky;
+	top: var(--wp-admin--admin-bar--height, 0);
+	z-index: 50;
+	background: color-mix(in srgb, var(--surface) 92%, transparent);
+	backdrop-filter: blur(8px);
+	border-bottom: 1px solid var(--line);
+}
+
+.acme-header__in {
+	display: flex;
+	align-items: center;
+	gap: var(--space-5);
+	min-height: var(--header-height);
+}
+
+.acme-nav {
+	margin-left: auto;
+}
+
+.acme-nav ul {
+	display: flex;
+	gap: var(--space-5);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.acme-nav a {
+	color: var(--ink);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.acme-nav a[aria-current="page"] {
+	color: var(--accent);
+}
+
+.acme-header__tools {
+	display: flex;
+	gap: var(--space-2);
+	align-items: center;
+}
+
+.acme-icon-btn {
+	display: inline-grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	border: 0;
+	border-radius: var(--radius-md);
+	background: none;
+	color: var(--ink);
+	cursor: pointer;
+}
+
+.acme-icon-btn:hover {
+	background: var(--surface-sunken);
+}
+
+.acme-burger {
+	display: none;
+}
+
+@media (max-width: 899.98px) {
+	.acme-nav {
+		display: none;
+	}
+
+	.acme-burger {
+		display: inline-grid;
+		margin-left: auto;
+	}
+}
+
+/* ---------- Мобильное меню ---------- */
+.acme-mnav {
+	position: fixed;
+	inset: var(--header-height) 0 0;
+	z-index: 49;
+	background: var(--surface);
+	padding: var(--space-5) var(--acme-gut);
+	overflow-y: auto;
+}
+
+.acme-mnav ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: var(--space-2);
+}
+
+.acme-mnav a {
+	display: block;
+	padding: var(--space-3) 0;
+	font-size: 19px;
+	color: var(--ink);
+	text-decoration: none;
+}
+
+.is-menu-open body {
+	overflow: hidden;
+}

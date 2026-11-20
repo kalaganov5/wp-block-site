@@ -1,0 +1,40 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "acme/price-table",
+	"title": "Таблица цен",
+	"category": "acme",
+	"description": "Заголовок и карточки с названием и описанием тарифа. Карточки без названия не выводятся.",
+	"textdomain": "acme",
+	"attributes": {
+		"title": {
+			"type": "string",
+			"default": ""
+		},
+		"lead": {
+			"type": "string",
+			"default": ""
+		},
+		"note": {
+			"type": "string",
+			"default": ""
+		},
+		"items": {
+			"type": "array",
+			"default": [],
+			"itemShape": { "title": "", "text": "", "url": "" }
+		},
+		"showNote": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"supports": {
+		"html": false,
+		"customClassName": false,
+		"reusable": false
+	},
+	"editorScript": "acme-editor",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

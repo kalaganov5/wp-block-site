@@ -1,0 +1,25 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "acme/cards",
+	"title": "Карточки-ссылки",
+	"category": "acme",
+	"description": "Сетка карточек со ссылками на записи или адреса. Первая может быть выделена.",
+	"textdomain": "acme",
+	"attributes": {
+		"items": {
+			"type": "array",
+			"default": [],
+			"itemShape": { "title": "", "text": "", "post": 0, "url": "", "urgent": false }
+		},
+		"moreLabel": { "type": "string", "default": "" }
+	},
+	"supports": {
+		"html": false,
+		"customClassName": false,
+		"reusable": false
+	},
+	"editorScript": "acme-editor",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

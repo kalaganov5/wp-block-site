@@ -1,0 +1,122 @@
+# SEO-аудит живого сайта с серверов GitHub: обход всех страниц (tools/qa/seo-crawl.js) и Lighthouse ключевых страниц.
+# Запуск: Actions → «SEO-аудит» → Run workflow, и сам — первого числа каждого месяца (адрес — переменная
+# репозитория SITE_URL). Отчёт сохраняется в ветку seo-reports (папка reports/<дата>/) и в артефакт запуска.
+# В репозиторий попадают только публичные данные сайта.
+# Каждый аудит сравнивается с предыдущим из ветки seo-reports (.github/scripts/seo-compare.sh): в сводке —
+# раздел «Изменилось с прошлого аудита». Запуск красный только при блокирующем ухудшении (больше страниц
+# с ошибкой, без title или description, заметно упала оценка Lighthouse) — отчёт при этом всё равно сохраняется.
+name: SEO-аудит
+
+on:
+  schedule:
+    - cron: '23 4 1 * *' # первого числа, ночью по Москве
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Адрес сайта (пусто — переменная репозитория SITE_URL)
+        default: https://acme.example
+      max_pages:
+        description: Сколько страниц обойти, не больше
+        default: '600'
+
+# По умолчанию — только чтение; запись нужна одному job: он кладёт отчёт в ветку seo-reports.
+permissions:
+  contents: read
+
+concurrency:
+  group: seo-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Обход и Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write # коммит отчёта в ветку seo-reports
+    env:
+      # По расписанию полей формы нет: адрес — из переменной репозитория, число страниц — по умолчанию.
+      SITE: ${{ inputs.url || vars.SITE_URL || 'https://acme.example' }}
+      MAX_PAGES: ${{ inputs.max_pages || '600' }}
+    steps:
+      # Учётные данные остаются в checkout намеренно: последний шаг делает git push в ветку seo-reports.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+      - name: Зависимости
+        run: npm i --no-save --prefix /tmp/seo node-html-parser@6 lighthouse@12
+      - name: Обход сайта
+        env:
+          NODE_PATH: /tmp/seo/node_modules
+        run: node wordpress/tools/qa/seo-crawl.js "$SITE" "$MAX_PAGES" report
+      - name: Lighthouse (мобильный)
+        run: |
+          mkdir -p report/lighthouse
+          for p in / /en/ /services/ /services/example/ /blog/ /about/ /contacts/; do  # ключевые страницы: по одной каждого типа
+            name=$(printf '%s' "$p" | tr '/' '_' | sed 's/^_//; s/_$//'); [ -n "$name" ] || name=home
+            /tmp/seo/node_modules/.bin/lighthouse "${SITE%/}$p" --quiet --output=json --output-path="report/lighthouse/$name.full.json" \
+              --chrome-flags="--headless=new --no-sandbox" --only-categories=performance,seo,accessibility,best-practices || echo "::warning::Lighthouse не прошёл для $p"
+          done
+          # Короткая выжимка: оценки, метрики и непройденные проверки.
+          node -e '
+            const fs = require("fs"), dir = "report/lighthouse", out = {};
+            for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".full.json"))) {
+              const r = JSON.parse(fs.readFileSync(dir + "/" + f, "utf8"));
+              const a = r.audits;
+              out[r.finalDisplayedUrl || r.finalUrl] = {
+                // Оценка 0 при живой странице — сбой замера, а не сайт: причина здесь.
+                error: [r.runtimeError && r.runtimeError.message, a["largest-contentful-paint"] && a["largest-contentful-paint"].errorMessage].filter(Boolean).join("; ") || undefined,
+                scores: Object.fromEntries(Object.entries(r.categories).map(([k, c]) => [k, Math.round(c.score * 100)])),
+                metrics: Object.fromEntries(["first-contentful-paint", "largest-contentful-paint", "total-blocking-time", "cumulative-layout-shift", "speed-index", "server-response-time"].map((k) => [k, a[k] && a[k].displayValue])),
+                failed: Object.values(a).filter((x) => x.score !== null && x.score < 0.9 && x.scoreDisplayMode !== "informative" && x.scoreDisplayMode !== "notApplicable").map((x) => x.id + ": " + x.title + (x.displayValue ? " (" + x.displayValue + ")" : "")),
+                // Какие элементы и файлы не прошли проверку (до 8 на проверку): селектор и кусок разметки или адрес.
+                where: Object.fromEntries(Object.values(a).filter((x) => x.score !== null && x.score < 0.9 && x.details && Array.isArray(x.details.items) && x.details.items.length).map((x) => [x.id, x.details.items.slice(0, 8).map((it) => it.node ? (it.node.selector + " | " + String(it.node.snippet || "").slice(0, 200) + (it.node.explanation ? " | " + String(it.node.explanation).split("\n").slice(0, 2).join(" ") : "")) : String(it.url || it.source && it.source.url || it.entity || JSON.stringify(it).slice(0, 200)))])),
+              };
+              fs.unlinkSync(dir + "/" + f);
+            }
+            fs.writeFileSync("report/lighthouse.json", JSON.stringify(out, null, 1));
+          '
+          rmdir report/lighthouse 2>/dev/null || true
+      - name: Сравнение с предыдущим аудитом
+        id: compare
+        run: |
+          # Предыдущий отчёт — последняя папка reports/<дата>/ в ветке seo-reports (при первом аудите ветки нет).
+          previous=""
+          if git fetch -q origin seo-reports 2>/dev/null; then
+            mkdir -p /tmp/previous
+            git archive FETCH_HEAD reports | tar -x -C /tmp/previous
+            previous=$(find /tmp/previous/reports -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1)
+          fi
+          status=0
+          if [ -n "$previous" ]; then
+            bash .github/scripts/seo-compare.sh report "$previous" > report/changes.md || status=$?
+          else
+            echo "Это первый аудит — сравнивать не с чем." > report/changes.md
+          fi
+          echo "blocking=$status" >> "$GITHUB_OUTPUT"
+      - name: Сводка в запуск
+        run: cat report/changes.md report/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: seo-report
+          path: report
+      - name: Отчёт в ветку seo-reports
+        run: |
+          set -e
+          dir="reports/$(date -u +%Y-%m-%d_%H%M)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mv report /tmp/report
+          if git fetch -q origin seo-reports; then git checkout -q -B seo-reports origin/seo-reports; else git checkout -q --orphan seo-reports && git rm -rq --cached . && git clean -fdxq; fi
+          mkdir -p "$dir" && cp -r /tmp/report/. "$dir/"
+          git add reports
+          git commit -qm "SEO-аудит ${SITE}: $dir"
+          git push -q origin seo-reports
+          echo "Отчёт: ветка seo-reports, папка $dir"
+      # Последним: отчёт уже сохранён, теперь можно пометить запуск неуспешным.
+      - name: Блокирующие ухудшения
+        if: ${{ steps.compare.outputs.blocking != '0' }}
+        run: |
+          echo "::error::SEO-аудит хуже предыдущего в блокирующих показателях — раздел «Изменилось с прошлого аудита» в сводке запуска."
+          exit 1

@@ -1,0 +1,12 @@
+# Локальный сайт: экспорт и файлы старого сайта (личные данные, в git не попадают).
+/local-data/
+# Экспорт WordPress в любом месте репозитория (черновики, личные записи, e-mail).
+/export/
+*.WordPress.*.xml
+# Ключи ручного деплоя (wordpress/deploy/manual.sh): пароли и адреса сервера.
+/wordpress/deploy/manual-*.env
+# Отчёты локальных проверок.
+/seo-report/
+/seo-gate-report/
+node_modules/
+/vendor/

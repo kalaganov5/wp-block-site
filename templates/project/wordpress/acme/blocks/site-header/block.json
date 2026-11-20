@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "acme/site-header",
+	"title": "Шапка сайта",
+	"category": "acme",
+	"description": "Логотип, меню из «Внешний вид → Меню», переключатели языка и темы, мобильное меню.",
+	"textdomain": "acme",
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"customClassName": false,
+		"reusable": false,
+		"inserter": false
+	},
+	"editorScript": "acme-editor",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

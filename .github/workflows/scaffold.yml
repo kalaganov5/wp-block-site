@@ -1,0 +1,50 @@
+# Проверка самого скилла: каркас разворачивается и проходит npm run check в получившемся проекте.
+# Полная установка с нуля, деплой и SEO-гейт — в CI развёрнутого проекта (templates/project/.github).
+name: Каркас
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scaffold-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scaffold:
+    name: Развернуть и проверить
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: evals.json — корректный JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('evals/evals.json','utf8'))"
+      - name: Развернуть каркас
+        run: node scripts/scaffold.js "$RUNNER_TEMP/site" --slug=studio --name="Studio Pro" --domain=studio.example
+      - name: В проекте не осталось имени-заглушки
+        working-directory: ${{ runner.temp }}/site
+        run: |
+          if grep -rIl --exclude-dir=node_modules --exclude-dir=vendor -e 'acme' -e 'ACME' .; then
+            echo '::error::scaffold.js оставил имя-заглушку acme в файлах выше'
+            exit 1
+          fi
+      - name: Инструменты проверки
+        working-directory: ${{ runner.temp }}/site
+        run: |
+          npm ci
+          composer install --no-interaction --no-progress
+      - name: npm run check в развёрнутом проекте
+        working-directory: ${{ runner.temp }}/site
+        env:
+          CI: 'true'
+        run: npm run check

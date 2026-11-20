@@ -1,0 +1,5 @@
+# Скрипты оболочки и конфиги запускаются в Linux: LF даже при клоне на Windows.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.woff2 binary

@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<!--
+	PHPCS для темы и плагина. Три группы правил:
+	1. Безопасность и надёжность — то, что ломает сайт:
+	   - WordPress.Security: неэкранированный вывод, данные запроса без проверки и очистки, nonce;
+	   - WordPress.DB: прямые запросы без prepare, медленные мета-запросы;
+	   - WordPress.WP: устаревшие функции, перезапись глобальных переменных WordPress;
+	   - PHPCompatibilityWP: код работает на минимальной версии PHP из style.css темы.
+	2. Оформление (WordPress-Core): отступы, пробелы, скобки. Чинит команда npm run format, руками не правится.
+	3. Читаемость: строка до 120 символов, функция до 40 строк, файл до 250, вложенность до 3, сложность до 10.
+	   Зачем пределы: файл читается целиком, функция — одна мысль (скилл wp-block-site, глава 15).
+	Локально: composer install, затем npm run lint:php (или npm run check — все проверки сразу).
+	Осознанное исключение в коде — комментарий «phpcs:ignore Правило», после него двойной дефис и причина.
+-->
+<ruleset name="Acme Site">
+	<description>Безопасность, оформление и читаемость кода темы и плагина.</description>
+
+	<file>wordpress/acme</file>
+	<file>wordpress/acme-core</file>
+	<!-- Сгенерированные файлы данных: только массивы строк. -->
+	<exclude-pattern>*/inc/strings-data.php</exclude-pattern>
+	<exclude-pattern>*/content/*.php</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="parallel" value="8"/>
+	<arg value="ps"/>
+
+	<!-- Минимальные версии PHP и WordPress — те же, что в style.css темы и шапке плагина (там же — как понизить).
+	     testVersion: код проверяется на совместимость с PHP от этой версии; minimum_wp_version: функции,
+	     устаревшие к этой версии WordPress, считаются ошибкой. -->
+	<config name="testVersion" value="8.3-"/>
+	<config name="minimum_wp_version" value="7.0"/>
+
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress.Security"/>
+	<rule ref="WordPress.DB"/>
+	<rule ref="WordPress.WP">
+		<!-- Подписи интерфейса берутся из строк Polylang (acme_t), а не gettext. -->
+		<exclude name="WordPress.WP.I18n"/>
+		<!-- Встраивание скриптов темы своим порядком — осознанно. -->
+		<exclude name="WordPress.WP.EnqueuedResourceParameters.NotInFooter"/>
+	</rule>
+	<!-- render.php блока WordPress подключает внутри функции: $id, $title и т. п. там локальные, а не глобальные.
+	     PHPCS этого не знает и ругается ложно. Переменные с префиксом ($acme_title) всё равно рекомендуются. -->
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
+		<exclude-pattern>*/blocks/*/render.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP">
+		<!-- Стиль условий (Yoda) — вопрос вкуса, не ошибка. -->
+		<exclude name="WordPress.PHP.YodaConditions"/>
+	</rule>
+	<rule ref="Generic.PHP.Syntax"/>
+	<rule ref="Generic.CodeAnalysis.EmptyStatement"/>
+
+	<!-- Свои функции экранирования, которые можно выводить без esc_*: acme_icon() возвращает только SVG из набора темы. -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<property name="customAutoEscapedFunctions" type="array">
+				<element value="acme_icon"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- ========== Оформление: стандарт WordPress ========== -->
+	<rule ref="WordPress-Core">
+		<!-- Имена файлов блоков и паттернов задаёт WordPress (render.php, service-page.php). -->
+		<exclude name="WordPress.Files.FileName"/>
+		<!-- Стиль условий (Yoda) — вопрос вкуса, не ошибка. -->
+		<exclude name="WordPress.PHP.YodaConditions"/>
+		<!-- Подписи берутся из строк Polylang (acme_t), а не gettext. -->
+		<exclude name="WordPress.WP.I18n"/>
+		<!-- Комментарий объясняет «почему»; описывать каждый параметр и ставить точку не требуем. -->
+		<exclude name="Squiz.Commenting"/>
+		<exclude name="Generic.Commenting.DocComment"/>
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
+	</rule>
+	<!-- Выравнивание «=>» — только пока ключи короткие: дальше оно раздувает строки. -->
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment">
+		<properties>
+			<property name="maxColumn" value="40"/>
+		</properties>
+	</rule>
+
+	<!-- ========== Читаемость: пределы размера ========== -->
+	<rule ref="Generic.Files.LineLength">
+		<properties>
+			<property name="lineLimit" value="120"/>
+			<property name="absoluteLineLimit" value="120"/>
+		</properties>
+		<!-- Паттерны — сохранённая разметка Gutenberg: перенос строки внутри блока делает его «недействительным». -->
+		<exclude-pattern>*/patterns/*.php</exclude-pattern>
+	</rule>
+	<rule ref="SlevomatCodingStandard.Functions.FunctionLength">
+		<properties>
+			<property name="maxLinesLength" value="40"/>
+		</properties>
+	</rule>
+	<rule ref="SlevomatCodingStandard.Files.FileLength">
+		<properties>
+			<property name="maxLinesLength" value="250"/>
+		</properties>
+	</rule>
+	<rule ref="Generic.Metrics.NestingLevel">
+		<properties>
+			<property name="nestingLevel" value="3"/>
+			<property name="absoluteNestingLevel" value="3"/>
+		</properties>
+	</rule>
+	<rule ref="Generic.Metrics.CyclomaticComplexity">
+		<properties>
+			<property name="complexity" value="10"/>
+			<property name="absoluteComplexity" value="10"/>
+		</properties>
+	</rule>
+</ruleset>

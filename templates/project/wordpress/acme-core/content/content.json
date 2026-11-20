@@ -1,0 +1,268 @@
+{
+ "version": 1,
+ "site": {
+  "name": "Acme Site",
+  "description": "Короткое описание сайта: кто вы и что делаете",
+  "settings": {
+   "area_served": "Россия"
+  }
+ },
+ "languages": [
+  {
+   "slug": "ru",
+   "name": "Русский",
+   "locale": "ru_RU",
+   "flag": "ru"
+  },
+  {
+   "slug": "en",
+   "name": "English",
+   "locale": "en_US",
+   "flag": "us"
+  }
+ ],
+ "media": [],
+ "topics": [
+  {
+   "key": "general",
+   "order": 1,
+   "names": {
+    "ru": "Общие задачи",
+    "en": "General"
+   }
+  }
+ ],
+ "posts": [
+  {
+   "type": "page",
+   "key": "home",
+   "role": "home",
+   "langs": {
+    "ru": {
+     "title": "Acme Site — заголовок первого экрана",
+     "slug": "main",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap\"} -->\n<div class=\"wp-block-group acme-wrap\"><!-- wp:paragraph {\"className\":\"acme-lead\"} -->\n<p class=\"acme-lead\">Первый абзац сразу отвечает на главный вопрос посетителя. Час работы — {{price:hour}}.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"className\":\"is-style-primary\"} -->\n<div class=\"wp-block-button is-style-primary\"><a class=\"wp-block-button__link wp-element-button\" href=\"#form\">Оставить заявку</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section is-sunken\"} -->\n<section class=\"wp-block-group acme-section is-sunken\"><!-- wp:group {\"className\":\"acme-wrap\"} -->\n<div class=\"wp-block-group acme-wrap\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">С чем приходят</h2>\n<!-- /wp:heading -->\n\n<!-- wp:acme/cards {\"items\":[{\"title\":\"Пример услуги\",\"text\":\"Какую задачу решает услуга — одним-двумя предложениями.\",\"post\":\"{{id:post:example}}\",\"url\":\"\",\"urgent\":false}],\"moreLabel\":\"Читать\"} /--></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:acme/lead-form /-->",
+     "excerpt": "",
+     "seoTitle": "Acme Site — услуги для малого бизнеса под ключ",
+     "seoDescription": "Acme Site помогает малому бизнесу: понятные услуги, точные сроки и цена от {{price:hour}} за час. Оставьте заявку — ответим в течение рабочего дня.",
+     "focusKeyword": ""
+    },
+    "en": {
+     "title": "Acme Site — hero heading",
+     "slug": "home",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap\"} -->\n<div class=\"wp-block-group acme-wrap\"><!-- wp:paragraph {\"className\":\"acme-lead\"} -->\n<p class=\"acme-lead\">The first paragraph answers the visitor’s main question right away. One hour of work — {{price:hour}}.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"className\":\"is-style-primary\"} -->\n<div class=\"wp-block-button is-style-primary\"><a class=\"wp-block-button__link wp-element-button\" href=\"#form\">Send a request</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section is-sunken\"} -->\n<section class=\"wp-block-group acme-section is-sunken\"><!-- wp:group {\"className\":\"acme-wrap\"} -->\n<div class=\"wp-block-group acme-wrap\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">What people come with</h2>\n<!-- /wp:heading -->\n\n<!-- wp:acme/cards {\"items\":[{\"title\":\"Example service\",\"text\":\"What problem the service solves, in one or two sentences.\",\"post\":\"{{id:post:example}}\",\"url\":\"\",\"urgent\":false}],\"moreLabel\":\"Read\"} /--></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:acme/lead-form /-->",
+     "excerpt": "",
+     "seoTitle": "Acme Site — turnkey services for small business",
+     "seoDescription": "Acme Site helps small businesses: clear services, firm deadlines and rates from {{price:hour}} per hour. Send a request and we reply within one business day.",
+     "focusKeyword": ""
+    }
+   }
+  },
+  {
+   "type": "page",
+   "key": "about",
+   "role": "about",
+   "langs": {
+    "ru": {
+     "title": "О нас",
+     "slug": "about",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap acme-prose\"} -->\n<div class=\"wp-block-group acme-wrap acme-prose\"><!-- wp:paragraph -->\n<p>Кто мы, сколько лет работаем, чем отличаемся.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->",
+     "excerpt": "",
+     "seoTitle": "О компании Acme Site: кто мы и как работаем",
+     "seoDescription": "Кто стоит за Acme Site: сколько лет работаем, с какими задачами приходят клиенты и чем мы отличаемся от других подрядчиков.",
+     "focusKeyword": ""
+    },
+    "en": {
+     "title": "About us",
+     "slug": "about-us",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap acme-prose\"} -->\n<div class=\"wp-block-group acme-wrap acme-prose\"><!-- wp:paragraph -->\n<p>Who we are, how long we have worked, what makes us different.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->",
+     "excerpt": "",
+     "seoTitle": "About Acme Site: who we are and how we work",
+     "seoDescription": "Who is behind Acme Site: how long we have been in business, what clients come to us with and what sets us apart from other contractors.",
+     "focusKeyword": ""
+    }
+   }
+  },
+  {
+   "type": "page",
+   "key": "contacts",
+   "role": "contacts",
+   "langs": {
+    "ru": {
+     "title": "Контакты",
+     "slug": "contacts",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap acme-prose\"} -->\n<div class=\"wp-block-group acme-wrap acme-prose\"><!-- wp:paragraph -->\n<p>Как с нами связаться и когда мы отвечаем.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:acme/lead-form /-->",
+     "excerpt": "",
+     "seoTitle": "Контакты Acme Site: как с нами связаться",
+     "seoDescription": "Напишите в Acme Site удобным способом: Telegram, e-mail или форма на сайте. Отвечаем в рабочие дни в течение нескольких часов.",
+     "focusKeyword": ""
+    },
+    "en": {
+     "title": "Contact",
+     "slug": "contact",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap acme-prose\"} -->\n<div class=\"wp-block-group acme-wrap acme-prose\"><!-- wp:paragraph -->\n<p>How to reach us and when we reply.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:acme/lead-form /-->",
+     "excerpt": "",
+     "seoTitle": "Contact Acme Site: how to reach us",
+     "seoDescription": "Reach Acme Site the way you prefer: Telegram, e-mail or the form on this page. We reply on business days within a few hours.",
+     "focusKeyword": ""
+    }
+   }
+  },
+  {
+   "type": "page",
+   "key": "blog",
+   "role": "blog",
+   "langs": {
+    "ru": {
+     "title": "Блог",
+     "slug": "blog",
+     "content": "",
+     "excerpt": "Статьи о нашей работе.",
+     "seoTitle": "Блог Acme Site: статьи и разборы из практики",
+     "seoDescription": "Статьи Acme Site о нашей работе: разборы задач клиентов, пошаговые инструкции и ответы на вопросы, которые нам задают чаще всего.",
+     "focusKeyword": ""
+    },
+    "en": {
+     "title": "Articles",
+     "slug": "articles",
+     "content": "",
+     "excerpt": "Articles about our work.",
+     "seoTitle": "Acme Site articles: guides from our practice",
+     "seoDescription": "Acme Site articles about our work: client case breakdowns, step-by-step guides and answers to the questions we hear most often.",
+     "focusKeyword": ""
+    }
+   }
+  },
+  {
+   "type": "page",
+   "key": "privacy",
+   "role": "privacy",
+   "langs": {
+    "ru": {
+     "title": "Политика конфиденциальности",
+     "slug": "privacy-policy",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap acme-prose\"} -->\n<div class=\"wp-block-group acme-wrap acme-prose\"><!-- wp:paragraph -->\n<p>Текст политики.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->",
+     "excerpt": "",
+     "seoTitle": "Политика конфиденциальности сайта Acme Site",
+     "seoDescription": "Какие персональные данные собирает сайт Acme Site, зачем они нужны, сколько хранятся и как попросить их изменить или удалить.",
+     "focusKeyword": ""
+    },
+    "en": {
+     "title": "Privacy policy",
+     "slug": "privacy",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap acme-prose\"} -->\n<div class=\"wp-block-group acme-wrap acme-prose\"><!-- wp:paragraph -->\n<p>Policy text.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->",
+     "excerpt": "",
+     "seoTitle": "Acme Site privacy policy",
+     "seoDescription": "What personal data the Acme Site website collects, why it is needed, how long it is kept and how to ask us to change or delete it.",
+     "focusKeyword": ""
+    }
+   }
+  },
+  {
+   "type": "acme_service",
+   "key": "example",
+   "topic": "general",
+   "langs": {
+    "ru": {
+     "title": "Пример услуги",
+     "slug": "example",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap\"} -->\n<div class=\"wp-block-group acme-wrap\"><!-- wp:paragraph {\"className\":\"acme-lead\"} -->\n<p class=\"acme-lead\">Какую задачу решает услуга — одним-двумя предложениями.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"className\":\"is-style-primary\"} -->\n<div class=\"wp-block-button is-style-primary\"><a class=\"wp-block-button__link wp-element-button\" href=\"#form\">Оставьте заявку</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap\"} -->\n<div class=\"wp-block-group acme-wrap\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Что входит</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-facts\"} -->\n<ul class=\"wp-block-list is-style-facts\"><!-- wp:list-item -->\n<li>Что входит — пункт 1</li>\n<!-- /wp:list-item --><!-- wp:list-item -->\n<li>Что входит — пункт 2</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section is-sunken\"} -->\n<section class=\"wp-block-group acme-section is-sunken\"><!-- wp:group {\"className\":\"acme-wrap acme-faq\"} -->\n<div class=\"wp-block-group acme-wrap acme-faq\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Вопросы и ответы</h2>\n<!-- /wp:heading -->\n\n<!-- wp:details -->\n<details class=\"wp-block-details\"><summary>Сколько стоит?</summary><!-- wp:paragraph -->\n<p>От {{price:hour}} за час работы.</p>\n<!-- /wp:paragraph --></details>\n<!-- /wp:details --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->",
+     "excerpt": "Какую задачу решает услуга — одним-двумя предложениями.",
+     "meta": {
+      "acme_short": "Пример",
+      "acme_price": "от {{price:hour}}"
+     },
+     "seoTitle": "Пример услуги — цена, сроки и что входит",
+     "seoDescription": "Пример услуги от Acme Site: какую задачу решает, что входит в работу и сколько стоит — от {{price:hour}} за час. Оставьте заявку на странице.",
+     "focusKeyword": "пример услуги"
+    },
+    "en": {
+     "title": "Example service",
+     "slug": "example-service",
+     "content": "<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap\"} -->\n<div class=\"wp-block-group acme-wrap\"><!-- wp:paragraph {\"className\":\"acme-lead\"} -->\n<p class=\"acme-lead\">What problem the service solves, in one or two sentences.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"className\":\"is-style-primary\"} -->\n<div class=\"wp-block-button is-style-primary\"><a class=\"wp-block-button__link wp-element-button\" href=\"#form\">Send a request</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section\"} -->\n<section class=\"wp-block-group acme-section\"><!-- wp:group {\"className\":\"acme-wrap\"} -->\n<div class=\"wp-block-group acme-wrap\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">What is included</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-facts\"} -->\n<ul class=\"wp-block-list is-style-facts\"><!-- wp:list-item -->\n<li>What is included — item 1</li>\n<!-- /wp:list-item --><!-- wp:list-item -->\n<li>What is included — item 2</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->\n\n<!-- wp:group {\"tagName\":\"section\",\"className\":\"acme-section is-sunken\"} -->\n<section class=\"wp-block-group acme-section is-sunken\"><!-- wp:group {\"className\":\"acme-wrap acme-faq\"} -->\n<div class=\"wp-block-group acme-wrap acme-faq\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">FAQ</h2>\n<!-- /wp:heading -->\n\n<!-- wp:details -->\n<details class=\"wp-block-details\"><summary>How much does it cost?</summary><!-- wp:paragraph -->\n<p>From {{price:hour}} per hour.</p>\n<!-- /wp:paragraph --></details>\n<!-- /wp:details --></div>\n<!-- /wp:group --></section>\n<!-- /wp:group -->",
+     "excerpt": "What problem the service solves, in one or two sentences.",
+     "meta": {
+      "acme_short": "Example",
+      "acme_price": "from {{price:hour}}"
+     },
+     "seoTitle": "Example service — price, timing and scope",
+     "seoDescription": "Example service by Acme Site: what problem it solves, what the work includes and what it costs — from {{price:hour}} per hour. Send a request.",
+     "focusKeyword": "example service"
+    }
+   }
+  },
+  {
+   "type": "post",
+   "key": "first-post",
+   "langs": {
+    "ru": {
+     "title": "Как мы работаем: от заявки до результата",
+     "slug": "kak-my-rabotaem",
+     "content": "<!-- wp:paragraph -->\n<p>Первый абзац статьи сразу отвечает на вопрос из заголовка: работа идёт в четыре шага, и на каждом клиент знает срок и цену.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Дальше — подробности по каждому шагу. Замените этот текст своим: статьи после запуска пишутся в админке.</p>\n<!-- /wp:paragraph -->",
+     "excerpt": "Пример статьи: из каких шагов состоит работа и что получает клиент на каждом.",
+     "seoTitle": "Как мы работаем: от заявки до результата — Acme Site",
+     "seoDescription": "Этапы работы Acme Site: заявка, оценка задачи, согласование сроков и цены, выполнение и проверка результата вместе с клиентом.",
+     "focusKeyword": ""
+    },
+    "en": {
+     "title": "How we work: from request to result",
+     "slug": "how-we-work",
+     "content": "<!-- wp:paragraph -->\n<p>The first paragraph answers the question in the title right away: the work has four steps, and at each one the client knows the timing and the price.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Then come the details of every step. Replace this text with your own: after launch articles are written in the admin.</p>\n<!-- /wp:paragraph -->",
+     "excerpt": "A sample article: the steps of our work and what the client gets at each one.",
+     "seoTitle": "How we work: from request to result — Acme Site",
+     "seoDescription": "How Acme Site works: request, task estimate, agreeing on timing and price, doing the job and checking the result together with the client.",
+     "focusKeyword": ""
+    }
+   }
+  }
+ ],
+ "menus": {
+  "acme_header": [
+   {
+    "archive": "acme_service",
+    "label": "navServices"
+   },
+   {
+    "role": "about",
+    "label": "navAbout"
+   },
+   {
+    "role": "blog",
+    "label": "navBlog"
+   },
+   {
+    "role": "contacts",
+    "label": "navContacts"
+   }
+  ],
+  "acme_footer": [
+   {
+    "archive": "acme_service",
+    "label": "navServices"
+   },
+   {
+    "role": "about",
+    "label": "navAbout"
+   },
+   {
+    "role": "blog",
+    "label": "navBlog"
+   },
+   {
+    "role": "contacts",
+    "label": "navContacts"
+   }
+  ],
+  "acme_footer_docs": [
+   {
+    "role": "privacy",
+    "label": "privacyShort"
+   }
+  ]
+ },
+ "redirects": {
+  "/old-services/": {
+   "archive": "acme_service"
+  }
+ }
+}
