@@ -4,3 +4,5 @@ vendor/
 # Отчёты локальных проверок.
 seo-report/
 seo-gate-report/
+templates/project.bundle.json
+dist/

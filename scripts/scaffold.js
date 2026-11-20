@@ -43,23 +43,40 @@ const swap = (s) => s
   .split('acme').join(slug);
 
 const SKIP_DIRS = ['node_modules', 'vendor'];
-let files = 0;
-(function copy(from, to) {
-  fs.mkdirSync(to, { recursive: true });
-  for (const e of fs.readdirSync(from, { withFileTypes: true })) {
-    // Установленные инструменты (npm install, composer install) в новый проект не копируются.
-    if (e.isDirectory() && SKIP_DIRS.includes(e.name)) continue;
-    const src = path.join(from, e.name);
-    const dst = path.join(to, swap(e.name));
-    if (e.isDirectory()) { copy(src, dst); continue; }
-    const buf = fs.readFileSync(src);
-    // Текстовые файлы — с заменой имён; бинарные (картинки, шрифты) — как есть.
-    const text = !buf.includes(0);
-    fs.writeFileSync(dst, text ? swap(buf.toString('utf8')) : buf);
-    if (/\.sh$/.test(e.name)) fs.chmodSync(dst, 0o755);
-    files++;
+// Каркас лежит папкой templates/project (репозиторий на GitHub) или одним файлом templates/project.bundle.json
+// (архив для claude.ai: там не больше 200 файлов в скилле). Файл собирает scripts/bundle-template.js.
+const BUNDLE = path.join(__dirname, '..', 'templates', 'project.bundle.json');
+
+/** Файлы каркаса: [путь от корня проекта, Buffer]. */
+function templateFiles() {
+  if (!fs.existsSync(SRC)) {
+    if (!fs.existsSync(BUNDLE)) fail('нет ни templates/project, ни templates/project.bundle.json');
+    const bundle = JSON.parse(fs.readFileSync(BUNDLE, 'utf8'));
+    return Object.entries(bundle.files).map(([file, base64]) => [file, Buffer.from(base64, 'base64')]);
   }
-})(SRC, DEST);
+  const found = [];
+  (function walk(dir, prefix) {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      // Установленные инструменты (npm install, composer install) в новый проект не копируются.
+      if (e.isDirectory() && SKIP_DIRS.includes(e.name)) continue;
+      const relative = prefix ? prefix + '/' + e.name : e.name;
+      if (e.isDirectory()) walk(path.join(dir, e.name), relative);
+      else found.push([relative, fs.readFileSync(path.join(dir, e.name))]);
+    }
+  })(SRC, '');
+  return found;
+}
+
+let files = 0;
+for (const [relative, buf] of templateFiles()) {
+  const dst = path.join(DEST, ...swap(relative).split('/'));
+  fs.mkdirSync(path.dirname(dst), { recursive: true });
+  // Текстовые файлы — с заменой имён; бинарные (картинки, шрифты) — как есть.
+  const text = !buf.includes(0);
+  fs.writeFileSync(dst, text ? swap(buf.toString('utf8')) : buf);
+  if (/.sh$/.test(relative)) fs.chmodSync(dst, 0o755);
+  files++;
+}
 
 console.log(`Готово: ${files} файлов в ${DEST}
 
