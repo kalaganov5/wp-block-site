@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   scaffold:
+    # Самое длинное допустимое имя (8 символов): если код каркаса не влезает в 120 символов с ним, проверка красная.
     name: Развернуть и проверить
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -30,7 +31,7 @@ jobs:
       - name: evals.json — корректный JSON
         run: node -e "JSON.parse(require('fs').readFileSync('evals/evals.json','utf8'))"
       - name: Развернуть каркас
-        run: node scripts/scaffold.js "$RUNNER_TEMP/site" --slug=studio --name="Studio Pro" --domain=studio.example
+        run: node scripts/scaffold.js "$RUNNER_TEMP/site" --slug=studiopr --name="Studio Pro" --domain=studio.example
       - name: В проекте не осталось имени-заглушки
         working-directory: ${{ runner.temp }}/site
         run: |
@@ -43,6 +44,10 @@ jobs:
         run: |
           npm ci
           composer install --no-interaction --no-progress
+      # Имя проекта длиннее заглушки acme: переносы и выравнивание кода меняются — как у пользователя после scaffold.
+      - name: npm run format — выровнять код под имя проекта
+        working-directory: ${{ runner.temp }}/site
+        run: npm run format
       - name: npm run check в развёрнутом проекте
         working-directory: ${{ runner.temp }}/site
         env:
